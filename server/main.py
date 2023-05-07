@@ -107,4 +107,4 @@ async def logo_png():
         raise HTTPException(status_code=404, detail="Logo file not found.")
 
 def start():
-    uvicorn.run("server.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("server.main:app", host="0.0.0.0", port=8080, reload=True)
