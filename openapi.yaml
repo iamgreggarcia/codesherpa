@@ -1,0 +1,119 @@
+openapi: 3.0.1
+info:
+  title: CodeSherpa
+  description: CodeSherpa is a tool that allows you to execute Python code in a REPL session, maintaining the state between requests, run terminal commands, and returns the output or error message.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /repl:
+    post:
+      summary: Execute Python code in a REPL-session like environment.
+      description: Executes the provided Python code in a REPL-like environment, maintaining the state between requests, and returns the output or error message.
+      operationId: executeReplCode
+      x-oaiMeta:
+        name: Execute Python code in REPL
+        group: execution
+        path: repl
+        examples:
+          curl: |
+            curl http://localhost:8000/repl \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "code": [
+                  "x = 5",
+                  "print(x)"
+                ]
+              }'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: array
+                  items:
+                    type: string
+                  description: A list of strings representing individual lines of the Python code to be executed in the REPL-like environment.
+      responses:
+        200:
+          description: Execution result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    description: The output of the executed code.
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  suggestion:
+                    type: string
+          x-oaiMeta:
+            parameters: |
+              {
+                "code": [
+                  "x = 5",
+                  "print(x)"
+                ]
+              }
+            response: |
+              {
+                "result": "5"
+              }
+  /command:
+    post:
+      summary: Run terminal commands
+      description: Runs the provided terminal command and returns the output or error message.
+      operationId: runCommand
+      x-oaiMeta:
+        name: Run terminal command
+        group: execution
+        path: command
+        examples:
+          curl: |
+            curl http://localhost:8000/command \
+              -H 'Content-Type: application/json' \
+              -d '{
+                "command": "echo \\"Hello, terminal!\\""
+              }'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: The terminal command to be executed.
+      responses:
+        200:
+          description: Execution result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    description: The output of the executed command.
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string

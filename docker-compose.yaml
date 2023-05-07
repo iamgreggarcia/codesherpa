@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  code-interpreter-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: codesherpa
+    container_name: codesherpa
+    ports:
+      - "8000:8000"
