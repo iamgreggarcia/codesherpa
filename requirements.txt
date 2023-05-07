@@ -4,3 +4,5 @@ pydantic
 matplotlib
 seaborn
 pandas
+pytest
+pytest-asyncio
