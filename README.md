@@ -1,6 +1,6 @@
 # CodeSherpa
 
-CodeSherpa is a code-interpreter ChatGPT plugin, built using FastAPI. This tool helps ChatGPT execute code snippets and run commands, all within a Docker container.
+CodeSherpa is a code-interpreter ChatGPT plugin. It allows ChatGPT to execute code and run commands within a Docker container.
 
 
 https://user-images.githubusercontent.com/16596972/236653720-945cfae8-6183-4c4b-bb5c-86663a0a06a6.MP4
