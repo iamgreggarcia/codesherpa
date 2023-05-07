@@ -4,7 +4,7 @@ info:
   description: CodeSherpa is a tool that allows you to execute Python code in a REPL session, maintaining the state between requests, run terminal commands, and returns the output or error message.
   version: 1.0.0
 servers:
-  - url: http://localhost:8000
+  - url: https://codesherpa.herokuapp.com/
 paths:
   /repl:
     post:
@@ -17,7 +17,7 @@ paths:
         path: repl
         examples:
           curl: |
-            curl http://localhost:8000/repl \
+            curl https://codesherpa.herokuapp.com/repl \
               -H 'Content-Type: application/json' \
               -d '{
                 "code": [
@@ -82,7 +82,7 @@ paths:
         path: command
         examples:
           curl: |
-            curl http://localhost:8000/command \
+            curl https://codesherpa.herokuapp.com/command \
               -H 'Content-Type: application/json' \
               -d '{
                 "command": "echo \\"Hello, terminal!\\""
