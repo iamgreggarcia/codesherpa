@@ -9,10 +9,10 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://codesherpa.herokuapp.com/.well-known/openapi.yaml",
+    "url": "https://localhost:3333/openapi.yaml",
     "is_user_authenticated": false
   },
-  "logo_url": "https://codesherpa.herokuapp.com/.well-known/logo.png",
+  "logo_url": "https://localhost:3333/logo.png",
   "contact_email": "support@example.com",
   "legal_info_url": "http://www.example.com/legal"
 }

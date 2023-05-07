@@ -10,21 +10,45 @@ import json
 import code
 from contextlib import redirect_stderr, redirect_stdout
 
+from models.api import CodeExecutionRequest, CommandExecutionRequest
+
+import uvicorn
+
 app = FastAPI()
+
+PORT = 3333
+
+origins = [
+    f"http://localhost:{PORT}",
+    "https://chat.openai.com",
+]
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class CodeExecutionRequest(BaseModel):
-    code: List[str]
+@app.route("/.well-known/ai-plugin.json")
+async def get_manifest(request):
+    file_path = "./local-server/ai-plugin.json"
+    return FileResponse(file_path, media_type="text/json")
 
-class CommandExecutionRequest(BaseModel):
-    command: str
+
+@app.route("/.well-known/logo.png")
+async def get_logo(request):
+    file_path = "./local-server/logo.png"
+    return FileResponse(file_path, media_type="text/json")
+
+
+@app.route("/.well-known/openapi.yaml")
+async def get_openapi(request):
+    file_path = "./local-server/openapi.yaml"
+    return FileResponse(file_path, media_type="text/json")
 
 persistent_console = code.InteractiveConsole()
 
@@ -94,3 +118,5 @@ async def logo_png():
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Logo file not found.")
 
+def start():
+    uvicorn.run("local-server.main:app", host="localhost", port=PORT, reload=True)
