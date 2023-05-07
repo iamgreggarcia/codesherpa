@@ -13,38 +13,20 @@ https://user-images.githubusercontent.com/16596972/236653720-945cfae8-6183-4c4b-
 
 ## Installation
 
-Before running the CodeSherpa plugin, make sure you have the following dependencies installed:
-
-- Docker
-- docker-compose
-
-To set up and run the CodeSherpa plugin, follow these steps:
-
-1. Clone the GitHub repository:
-
-```bash
-git clone https://github.com/your_username/CodeSherpa.git
-```
-
-2. Navigate to the project's root directory:
-
-```bash
-cd CodeSherpa
-```
-
-3. Run the docker-compose command to build and run the application:
-
-```bash
-docker-compose up --build
-```
-
-4. The CodeSherpa API will be running on port 8000. You can access the API at `http://localhost:8000`.
-
+1. Install Python 3.10, if not already installed.
+2. Clone the repository: `git clone https://github.com/openai/chatgpt-retrieval-plugin.git`
+3. Navigate to the cloned repository directory: `cd /path/to/chatgpt-retrieval-plugin`
+4. Install poetry: `pip install poetry`
+5. Create a new virtual environment with Python 3.10: `poetry env use python3.10`
+6. Activate the virtual environment: `poetry shell`
+7. Install app dependencies: `poetry install`
+8. Run the API locally: `poetry run start`
+9. 
 ## Running the Plugin Locally
 
 To run the CodeSherpa plugin locally and connect it to ChatGPT, follow these steps:
 
-1. Ensure the CodeSherpa API is running on your local machine (refer to the Installation section in this README).
+1. Run the API on localhost: `poetry run dev`. This will start the API on `localhost:3333`.
 2. Navigate to the ChatGPT UI, and access the plugin store.
 3. Select "Develop your own plugin".
 4. Enter your localhost and port number (e.g., `localhost:8000`). Note that only the "none" authentication type is currently supported for localhost development.
