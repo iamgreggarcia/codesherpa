@@ -2,7 +2,7 @@
 # make heroku-login
 # make heroku-push
 
-HEROKU_APP = <your app name> 
+HEROKU_APP = codesherpa
 
 heroku-push:
 	docker buildx build --platform linux/amd64 -t ${HEROKU_APP} .

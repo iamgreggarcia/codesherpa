@@ -3,11 +3,11 @@ import io
 import json
 import code
 import subprocess
-from typing import List
+from typing import List, Annotated
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 from contextlib import redirect_stderr, redirect_stdout
 
@@ -21,12 +21,14 @@ assert BEARER_TOKEN is not None
 
 
 def validate_token(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+    print(f"Validating token: {credentials}")
     if credentials.scheme != "Bearer" or credentials.credentials != BEARER_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid or missing token")
     return credentials
 
 
 app = FastAPI(dependencies=[Depends(validate_token)])
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 # mount the .well-known directory to serve the manifest and logo
 app.mount("/.well-known", StaticFiles(directory=".well-known"), name="well-known")
@@ -105,6 +107,10 @@ async def logo_png():
         return FileResponse("logo.png", media_type="image/png")
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Logo file not found.")
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 def start():
     uvicorn.run("server.main:app", host="0.0.0.0", port=8080, reload=True)
