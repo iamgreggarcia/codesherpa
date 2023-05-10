@@ -14,14 +14,14 @@ https://user-images.githubusercontent.com/16596972/236653720-945cfae8-6183-4c4b-
 ## Installation
 
 1. Install Python 3.10, if not already installed.
-2. Clone the repository: `git clone https://github.com/openai/chatgpt-retrieval-plugin.git`
-3. Navigate to the cloned repository directory: `cd /path/to/chatgpt-retrieval-plugin`
+2. Clone the repository: `git clone https://github.com/yourusername/codesherpa.git`
+3. Navigate to the cloned repository directory: `cd /path/to/codesherpa`
 4. Install poetry: `pip install poetry`
 5. Create a new virtual environment with Python 3.10: `poetry env use python3.10`
 6. Activate the virtual environment: `poetry shell`
 7. Install app dependencies: `poetry install`
 8. Run the API locally: `poetry run start`
-9. 
+   
 ## Running the Plugin Locally
 
 To run the CodeSherpa plugin locally and connect it to ChatGPT, follow these steps:
