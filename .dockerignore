@@ -4,7 +4,7 @@
 scripts/
 tests/
 examples/
-local-server/
+localserver/
 *.md
 *.pyc
 .dockerignore

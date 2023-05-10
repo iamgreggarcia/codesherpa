@@ -1,9 +1,0 @@
-fastapi
-uvicorn
-pydantic
-matplotlib
-seaborn
-pandas
-pytest
-pytest-asyncio
-httpx

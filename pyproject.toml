@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 packages = [
     { include = "server", from = "." },
-    { include = "local-server", from = "." },
+    { include = "localserver", from = "." },
 ]
 
 [tool.poetry.dependencies]
@@ -26,10 +26,11 @@ httpx = "^0.23.3"
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 pytest-asyncio = "^0.20.3"
+loguru = "^0.7.0"
 
 [tool.poetry.scripts]
 start = "server.main:start"
-dev = "local-server.main:start"
+dev = "localserver.main:start"
 
 [build-system]
 requires = ["poetry-core"]

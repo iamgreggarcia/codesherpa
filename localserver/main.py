@@ -7,12 +7,15 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import io
 import json
+import sys
 import code
 from contextlib import redirect_stderr, redirect_stdout
-
 from models.api import CodeExecutionRequest, CommandExecutionRequest
-
 import uvicorn
+from loguru import logger
+
+logger.remove()
+logger.add(sys.stderr, level="INFO")
 
 app = FastAPI()
 
@@ -33,26 +36,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.route("/.well-known/ai-plugin.json")
-async def get_manifest(request):
-    file_path = "./local-server/ai-plugin.json"
+@app.get("/.well-known/ai-plugin.json")
+async def get_manifest():
+    file_path = "./localserver/ai-plugin.json"
+    return FileResponse(file_path, media_type="application/json")
+
+
+@app.get("/.well-known/logo.png")
+async def get_logo():
+    file_path = "./localserver/logo.png"
     return FileResponse(file_path, media_type="text/json")
 
 
-@app.route("/.well-known/logo.png")
-async def get_logo(request):
-    file_path = "./local-server/logo.png"
-    return FileResponse(file_path, media_type="text/json")
-
-
-@app.route("/.well-known/openapi.yaml")
-async def get_openapi(request):
-    file_path = "./local-server/openapi.yaml"
+@app.get("/.well-known/openapi.yaml")
+async def get_openapi():
+    file_path = "./localserver/openapi.yaml"
     return FileResponse(file_path, media_type="text/json")
 
 persistent_console = code.InteractiveConsole()
 
 def execute_code_in_repl(code_list: List[str]) -> str:
+    logger.info(f"Executing code in REPL: {code_list}")
     output = io.StringIO()
 
     try:
@@ -68,10 +72,13 @@ def execute_code_in_repl(code_list: List[str]) -> str:
 
 @app.post("/repl")
 def repl(request: CodeExecutionRequest):
+    logger.info(f"Executing REPL with request: {request}")
     try:
         code_output = execute_code_in_repl(request.code)
+        logger.info(f"REPL execution result: {code_output}")
         response = {"result": code_output.strip()}
     except Exception as e:
+        logger.error(f"Error in REPL execution: {e}")
         response = {"error": str(e)}
         return response
     
@@ -88,35 +95,14 @@ async def execute_command(command: str) -> str:
 
 @app.post("/command")
 async def command_endpoint(command_request: CommandExecutionRequest):
+    logger.info(f"Executing command with request: {command_request}")
     try:
         command_result = await execute_command(command_request.command)
+        logger.info(f"Command execution result: {command_result}")
         return {"result": command_result}
     except Exception as e:
+        logger.error(f"Error in command execution: {e}")
         return {"error": str(e)}
-
-@app.get("/openapi.yaml")
-async def openapi_yaml():
-    try:
-        return FileResponse("openapi.yaml", media_type="text/yaml")
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=404, detail="OpenAPI specification file not found.")
-
-@app.get("/.well-known/ai-plugin.json")
-async def get_plugin_manifest():
-    try:
-        with open(".well-known/ai-plugin.json", "r") as f:
-            manifest = json.load(f)
-        return manifest
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Manifest file not found.")
     
-@app.get("/logo.png")
-async def logo_png():
-    try:
-        return FileResponse("logo.png", media_type="image/png")
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Logo file not found.")
-
 def start():
-    uvicorn.run("local-server.main:app", host="localhost", port=PORT, reload=True)
+    uvicorn.run("localserver.main:app", host="localhost", port=PORT, reload=True)
