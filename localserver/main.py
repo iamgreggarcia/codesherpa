@@ -88,7 +88,7 @@ async def execute_command(command: str) -> str:
     try:
         result = subprocess.run(
             command.split(), capture_output=True, text=True)
-        return f"Command execution result:\n{result.stdout}"
+        return f"Result:\n{result.stdout}"
     except Exception as e:
         return f"Error executing command: {str(e)}"
 
