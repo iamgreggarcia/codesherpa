@@ -14,6 +14,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import uvicorn
 from models.api import CodeExecutionRequest, CommandExecutionRequest
 from loguru import logger
+from .container_manager import ContainerManager
 
 logger.remove()
 logger.add(sys.stderr, level="INFO")
@@ -24,11 +25,15 @@ bearer_scheme = HTTPBearer()
 BEARER_TOKEN = os.environ.get("BEARER_TOKEN")
 assert BEARER_TOKEN is not None
 
+container_manager = ContainerManager()
 
 def validate_token(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
     print(f"Validating token: {credentials}")
     if credentials.scheme != "Bearer" or credentials.credentials != BEARER_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid or missing token")
+        
+    container_manager.create_container_for_user(credentials.credentials)
+
     return credentials
 
 
