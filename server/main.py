@@ -2,6 +2,7 @@ import os
 import io
 import json
 import code
+import sys
 import subprocess
 from typing import List, Annotated
 from fastapi import FastAPI, HTTPException, Depends
@@ -10,9 +11,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 from contextlib import redirect_stderr, redirect_stdout
-
 import uvicorn
 from models.api import CodeExecutionRequest, CommandExecutionRequest
+from loguru import logger
+
+logger.remove()
+logger.add(sys.stderr, level="INFO")
+
 
 
 bearer_scheme = HTTPBearer()
