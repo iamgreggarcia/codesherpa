@@ -34,3 +34,5 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run pytest -v tests/
+      env:
+        BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
