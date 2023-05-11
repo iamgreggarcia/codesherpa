@@ -52,13 +52,36 @@ app.add_middleware(
 
 persistent_console = code.InteractiveConsole()
 
-def execute_code_in_repl(code_list: List[str]) -> str:
+
+
+@app.post("/repl")
+def repl(request: CodeExecutionRequest, credentials: HTTPAuthorizationCredentials = Depends(validate_token)):
+    user_container = container_manager.user_containers.get(credentials.credentials)
+    if not user_container:
+        raise HTTPException(status_code=410, detail="Docker container not found")
+    
+    code_output = execute_code_in_repl(request.code, user_container)
+    response = {"result": code_output.strip()}
+    return response
+
+@app.post("/command")
+async def command_endpoint(command_request: CommandExecutionRequest, credentials: HTTPAuthorizationCredentials = Depends(validate_token)):
+    user_container = container_manager.user_containers.get(credentials.credentials)
+    if not user_container:
+        raise HTTPException(status_code=410, detail="Docker container not found")
+    
+    command_result = await execute_command(command_request.command, user_container)
+    return {"result": command_result}
+
+def execute_code_in_repl(code_list: List[str], container) -> str:
     output = io.StringIO()
 
     try:
         with redirect_stdout(output), redirect_stderr(output):
             for code_line in code_list:
-                persistent_console.push(code_line)
+                result = container.exec_run(f"python -c '{code_line}'", stream=True)
+                for line in result[1]:
+                    output.write(line.decode("utf-8"))
         result = output.getvalue()
 
     except Exception as e:
@@ -66,33 +89,18 @@ def execute_code_in_repl(code_list: List[str]) -> str:
 
     return result
 
-@app.post("/repl")
-def repl(request: CodeExecutionRequest):
+async def execute_command(command: str, container) -> str:
     try:
-        code_output = execute_code_in_repl(request.code)
-        response = {"result": code_output.strip()}
-    except Exception as e:
-        response = {"error": str(e)}
-        return response
-    
-    return response
-
-async def execute_command(command: str) -> str:
-    try:
-        result = subprocess.run(
-            command.split(), capture_output=True, text=True)
-        return f"Command execution result:\n{result.stdout}"
+        result = container.exec_run(command, stream=True)
+        output = ""
+        for line in result[1]:
+            if isinstance(line, bytes):
+                output += line.decode("utf-8")
+            else:
+                output += str(line)
+        return f"Command execution result:\n{output}"
     except Exception as e:
         return f"Error executing command: {str(e)}"
-
-
-@app.post("/command")
-async def command_endpoint(command_request: CommandExecutionRequest):
-    try:
-        command_result = await execute_command(command_request.command)
-        return {"result": command_result}
-    except Exception as e:
-        return {"error": str(e)}
 
 @app.get("/openapi.yaml")
 async def openapi_yaml():
