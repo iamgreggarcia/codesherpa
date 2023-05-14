@@ -5,42 +5,30 @@ import code
 import sys
 import subprocess
 from typing import List, Annotated
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, WebSocket, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 from contextlib import redirect_stderr, redirect_stdout
 import uvicorn
 from models.api import CodeExecutionRequest, CommandExecutionRequest
 from loguru import logger
 from .container_manager import ContainerManager
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 logger.remove()
 logger.add(sys.stderr, level="INFO")
 
-
-
-bearer_scheme = HTTPBearer()
-BEARER_TOKEN = os.environ.get("BEARER_TOKEN")
-assert BEARER_TOKEN is not None
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 container_manager = ContainerManager()
 
-def validate_token(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
-    print(f"Validating token: {credentials}")
-    if credentials.scheme != "Bearer" or credentials.credentials != BEARER_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid or missing token")
-        
-    container_manager.create_container_for_user(credentials.credentials)
-
-    return credentials
-
-
-app = FastAPI(dependencies=[Depends(validate_token)])
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
-# mount the .well-known directory to serve the manifest and logo
 app.mount("/.well-known", StaticFiles(directory=".well-known"), name="well-known")
 app.add_middleware(
     CORSMiddleware,
@@ -52,36 +40,20 @@ app.add_middleware(
 
 persistent_console = code.InteractiveConsole()
 
-
-
 @app.post("/repl")
-def repl(request: CodeExecutionRequest, credentials: HTTPAuthorizationCredentials = Depends(validate_token)):
-    user_container = container_manager.user_containers.get(credentials.credentials)
-    if not user_container:
-        raise HTTPException(status_code=410, detail="Docker container not found")
-    
-    code_output = execute_code_in_repl(request.code, user_container)
-    response = {"result": code_output.strip()}
-    return response
+@limiter.limit("5/minute")
+async def repl(request: Request, code_execution_request: CodeExecutionRequest):
+    code_output = execute_code_in_repl(code_execution_request.code)
+    return {"result": code_output}
 
-@app.post("/command")
-async def command_endpoint(command_request: CommandExecutionRequest, credentials: HTTPAuthorizationCredentials = Depends(validate_token)):
-    user_container = container_manager.user_containers.get(credentials.credentials)
-    if not user_container:
-        raise HTTPException(status_code=410, detail="Docker container not found")
-    
-    command_result = await execute_command(command_request.command, user_container)
-    return {"result": command_result}
-
-def execute_code_in_repl(code_list: List[str], container) -> str:
+def execute_code_in_repl(code_list: List[str]) -> str:
     output = io.StringIO()
 
     try:
         with redirect_stdout(output), redirect_stderr(output):
             for code_line in code_list:
-                result = container.exec_run(f"python -c '{code_line}'", stream=True)
-                for line in result[1]:
-                    output.write(line.decode("utf-8"))
+                for command in code_line.split(';'):
+                    result = persistent_console.push(command.strip())
         result = output.getvalue()
 
     except Exception as e:

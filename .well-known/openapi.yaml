@@ -4,7 +4,7 @@ info:
   description: CodeSherpa is a tool that allows you to execute Python code in a REPL session, maintaining the state between requests, run terminal commands, and returns the output or error message.
   version: 1.0.0
 servers:
-  - url: https://codesherpa.herokuapp.com/
+  - url: https://codesherpa.dev/
 paths:
   /repl:
     post:
