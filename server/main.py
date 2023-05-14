@@ -8,6 +8,8 @@ from typing import List, Annotated
 from fastapi import FastAPI, HTTPException, Depends, WebSocket, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from contextlib import redirect_stderr, redirect_stdout
 import uvicorn
@@ -91,9 +93,11 @@ async def logo_png():
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Logo file not found.")
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 def start():
     port = int(os.environ.get("PORT", 8080))
