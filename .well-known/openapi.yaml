@@ -17,7 +17,7 @@ paths:
         path: repl
         examples:
           curl: |
-            curl https://codesherpa.herokuapp.com/repl \
+            curl https://www.codesherpa.dev/repl \
               -H 'Content-Type: application/json' \
               -d '{
                 "code": [
@@ -82,7 +82,7 @@ paths:
         path: command
         examples:
           curl: |
-            curl https://codesherpa.herokuapp.com/command \
+            curl https://www.codesherpa.dev/command \
               -H 'Content-Type: application/json' \
               -d '{
                 "command": "echo \\"Hello, terminal!\\""

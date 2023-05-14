@@ -30,13 +30,6 @@ container_manager = ContainerManager()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/.well-known", StaticFiles(directory=".well-known"), name="well-known")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 persistent_console = code.InteractiveConsole()
 
