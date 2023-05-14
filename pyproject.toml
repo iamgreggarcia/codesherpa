@@ -21,6 +21,8 @@ pandas = "^2.0.1"
 passlib = "^1.7.4"
 python-jose = "^3.3.0"
 slowapi = "^0.1.8"
+loguru = "^0.7.0"
+docker = "^6.1.1"
 
 [tool.poetry.group.dev.dependencies]
 httpx = "^0.23.3"
