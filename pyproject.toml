@@ -23,15 +23,18 @@ python-jose = "^3.3.0"
 slowapi = "^0.1.8"
 loguru = "^0.7.0"
 google-auth = "^2.18.0"
+httpx = "^0.24.0" 
+requests = "^2.30.0"
+jinja2 = "^3.1.2"
 
 [tool.poetry.group.dev.dependencies]
-httpx = "^0.23.3"
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 pytest-asyncio = "^0.20.3"
 loguru = "^0.7.0"
 flake8 = "^4.0.1"
 google-auth = "^2.18.0"
+requests = "^2.30.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

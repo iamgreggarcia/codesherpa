@@ -46,10 +46,10 @@ async def send_request_to_gcloud_run(code_execution_request: CodeExecutionReques
     url = os.environ.get('GOOGLE_CLOUD_RUN_URL')
 
     # Load the service account key from the environment variable
-    service_account_key = json.loads(os.environ.get('GOOGLE_SERVICE_ACCOUNT_KEY'))
+    service_account_info = json.load(open('google-credentials.json'))
 
     # Use the key to create credentials
-    credentials = service_account.Credentials.from_service_account_info(service_account_key)
+    credentials = service_account.Credentials.from_service_account_info(service_account_info)
 
     # Create an access token
     auth_req = google.auth.transport.requests.Request()
@@ -96,3 +96,6 @@ def start():
     port = int(os.environ.get("PORT", 8080))
     uvicorn.run("server.main:app", host="0.0.0.0", port=port, reload=True)
 
+
+if __name__ == "__main__":
+    start()
