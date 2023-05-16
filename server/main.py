@@ -45,7 +45,7 @@ async def repl(request: Request, code_execution_request: CodeExecutionRequest):
 async def send_request_to_gcloud_run(code_execution_request: CodeExecutionRequest):
     url = os.environ.get('GOOGLE_CLOUD_RUN_URL')
 
-    # Load the service account key from the environment variable
+    # Load the service account key file
     service_account_info = json.load(open('google-credentials.json'))
 
     # Use the key to create credentials
