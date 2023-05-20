@@ -1,6 +1,6 @@
 # CodeSherpa
 
-CodeSherpa is a code-interpreter ChatGPT plugin. It allows ChatGPT to execute code and run commands within a Docker container.
+CodeSherpa is a python code-interpreter ChatGPT plugin. Curretly, it  allows ChatGPT to execute code and run commands locally. 
 
 
 https://user-images.githubusercontent.com/16596972/236653720-945cfae8-6183-4c4b-bb5c-86663a0a06a6.MP4
@@ -20,7 +20,6 @@ https://user-images.githubusercontent.com/16596972/236653720-945cfae8-6183-4c4b-
 5. Create a new virtual environment with Python 3.10: `poetry env use python3.10`
 6. Activate the virtual environment: `poetry shell`
 7. Install app dependencies: `poetry install`
-8. Run the API locally: `poetry run start`
    
 ## Running the Plugin Locally
 

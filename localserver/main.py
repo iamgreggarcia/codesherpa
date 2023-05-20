@@ -1,9 +1,11 @@
 import subprocess
 from typing import List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,UploadFile, File 
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+import shutil
 from pydantic import BaseModel
 import io
 import json
@@ -15,7 +17,7 @@ import uvicorn
 from loguru import logger
 
 logger.remove()
-logger.add(sys.stderr, level="INFO")
+logger.configure(handlers=[{"sink": sys.stderr, "format": "<green>{time}</green> <level>{message}</level>", "colorize": True}])
 
 app = FastAPI()
 
@@ -55,20 +57,25 @@ async def get_openapi():
 
 persistent_console = code.InteractiveConsole()
 
-def execute_code_in_repl(code_list: List[str]) -> str:
-    logger.info(f"Executing code in REPL: {code_list}")
+def execute_code_in_repl(code: str) -> str:
+    logger.info(f"Executing code in REPL - this is an update: {code}")
     output = io.StringIO()
+
+    # Split the code into lines
+    code_lines = code.split('\n')
 
     try:
         with redirect_stdout(output), redirect_stderr(output):
-            for code_line in code_list:
-                persistent_console.push(code_line)
+            # Execute each line of code in the REPL
+            for line in code_lines:
+                persistent_console.push(line)
         result = output.getvalue()
 
     except Exception as e:
         result = str(e)
 
     return result
+
 
 @app.post("/repl")
 def repl(request: CodeExecutionRequest):
@@ -103,6 +110,13 @@ async def command_endpoint(command_request: CommandExecutionRequest):
     except Exception as e:
         logger.error(f"Error in command execution: {e}")
         return {"error": str(e)}
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    with open(Path("static/images") / file.filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"filename": file.filename}
+
     
 def start():
-    uvicorn.run("localserver.main:app", host="localhost", port=PORT, reload=True)
+    uvicorn.run("localserver.main:app", host="0.0.0.0", port=PORT, reload=True)

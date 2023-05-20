@@ -11,32 +11,12 @@ paths:
       summary: Execute Python code in a REPL-session like environment.
       description: Executes the provided Python code in a REPL-like environment, maintaining the state between requests, and returns the output or error message.
       operationId: executeReplCode
-      x-oaiMeta:
-        name: Execute Python code in REPL
-        group: execution
-        path: repl
-        examples:
-          curl: |
-            curl http://localhost:3333/repl \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "code": [
-                  "x = 5",
-                  "print(x)"
-                ]
-              }'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                code:
-                  type: array
-                  items:
-                    type: string
-                  description: A list of strings representing individual lines of the Python code to be executed in the REPL-like environment.
+              $ref: '#/components/schemas/CodeExecutionRequest'
       responses:
         200:
           description: Execution result
@@ -57,46 +37,17 @@ paths:
                 properties:
                   error:
                     type: string
-                  suggestion:
-                    type: string
-          x-oaiMeta:
-            parameters: |
-              {
-                "code": [
-                  "x = 5",
-                  "print(x)"
-                ]
-              }
-            response: |
-              {
-                "result": "5"
-              }
   /command:
     post:
       summary: Run terminal commands
       description: Runs the provided terminal command and returns the output or error message.
       operationId: runCommand
-      x-oaiMeta:
-        name: Run terminal command
-        group: execution
-        path: command
-        examples:
-          curl: |
-            curl http://localhost:3333/command \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "command": "echo \\"Hello, terminal!\\""
-              }'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                command:
-                  type: string
-                  description: The terminal command to be executed.
+              $ref: '#/components/schemas/CommandExecutionRequest'
       responses:
         200:
           description: Execution result
@@ -117,3 +68,20 @@ paths:
                 properties:
                   error:
                     type: string
+components:
+  schemas:
+    CodeExecutionRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The Python code to be executed in the REPL-like environment.
+          example: "import pandas as pd\nimport numpy as np\nnp.random.seed(0)\ndf = pd.DataFrame({'A': np.random.rand(100), 'B': np.random.rand(100)})\ndf['target'] = df['A'] + 2*df['B']\ndf.head()"
+    CommandExecutionRequest:
+       type: object
+       properties:
+         command:
+           type: string
+           description: The terminal command to be executed.
+           example: "echo \"Hello, terminal!\""
+
