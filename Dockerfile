@@ -1,17 +1,31 @@
-FROM python:3.10 as requirements-stage
+# Base Ubuntu Image
+FROM ubuntu:22.04
 
-WORKDIR /tmp
+# Update and install necessary compilers/interpreters
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
+    g++ \
+    curl \
+    make
 
-RUN pip install poetry
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 
-COPY ./pyproject.toml ./poetry.lock* /tmp/
-
-RUN poetry config virtualenvs.create false \
-    && poetry export -f requirements.txt --output requirements.txt --without-hashes
-
-FROM python:3.10
-
+# Set up working directory
 WORKDIR /app
+
+# Copy Python dependencies and install them
+COPY ./pyproject.toml ./poetry.lock* /tmp/
+RUN pip install poetry \
+    && cd /tmp \
+    && poetry config virtualenvs.create false \
+    && poetry export -f requirements.txt --output requirements.txt --without-hashes \
+    && pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
+
+# Install testing tools
+RUN pip install pytest pytest-cov pytest-asyncio
 
 # Create directory for uploads
 RUN mkdir -p /app/static/images
@@ -19,13 +33,10 @@ RUN mkdir -p /app/static/images
 # Set PYTHONPATH
 ENV PYTHONPATH=/app
 
-COPY --from=requirements-stage /tmp/requirements.txt /app/requirements.txt
-
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
-
+# Copy over all the other files
 COPY . /app/
 
 # Just for debugging, let's list the contents of /app and /app/localserver
 RUN ls -al /app && ls -al /app/localserver
 
-CMD ["python", "-c", "import localserver.main; localserver.main.start()"]
+CMD ["python3", "-c", "import localserver.main; localserver.main.start()"]

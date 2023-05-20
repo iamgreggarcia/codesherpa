@@ -16,11 +16,19 @@ from loguru import logger
 import uvicorn
 
 from models.api import CodeExecutionRequest, CommandExecutionRequest
+from executors.executor import PythonExecutor, CppExecutor, RustExecutor
+
 
 
 logger.configure(handlers=[{"sink": sys.stderr, "format": "<green>{time}</green> <level>{message}</level>", "colorize": True}])
 
 app = FastAPI()
+
+executors = {
+    "python310": PythonExecutor(),
+    "c++": CppExecutor(),
+    "rust": RustExecutor(),
+}
 
 PORT = 3333
 

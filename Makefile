@@ -1,4 +1,4 @@
-.PHONY: build-docker run-docker remove-docker
+.PHONY: build-docker run-docker remove-docker test test-docker
 
 build-docker:
 	docker build -t codesherpa:localserver .
@@ -8,5 +8,11 @@ run-docker:
 
 remove-docker:
 	docker rm -f localserver || true
+
+test:
+	pytest tests/
+
+test-docker: build-docker
+	docker run --rm codesherpa:localserver make test
 
 dev: remove-docker build-docker run-docker
