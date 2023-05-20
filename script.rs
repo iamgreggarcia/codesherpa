@@ -1,5 +1,1 @@
-
-    fn main() {
-        println!("Hello, World!);
-    }
-    
+fn main() { let x = 0; let y = 10 / x; println!("{}", y); }

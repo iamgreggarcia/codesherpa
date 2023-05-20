@@ -19,7 +19,6 @@ from models.api import CodeExecutionRequest, CommandExecutionRequest
 from executors.executor import PythonExecutor, CppExecutor, RustExecutor
 
 
-
 logger.configure(handlers=[{"sink": sys.stderr, "format": "<green>{time}</green> <level>{message}</level>", "colorize": True}])
 
 app = FastAPI()
@@ -75,35 +74,6 @@ async def get_openapi():
 
 persistent_console = code.InteractiveConsole()
 
-def execute_code_in_repl(code: str) -> str:
-    """
-    Executes the given code string in a REPL environment and returns the result.
-    
-    Args:
-        code (str): The code to execute.
-
-    Returns:
-        str: The result of the code execution.
-    """
-    logger.info(f"Executing code in REPL - this is an update: {code}")
-    output = io.StringIO()
-
-    # Split the code into lines
-    code_lines = code.split('\n')
-
-    try:
-        with redirect_stdout(output), redirect_stderr(output):
-            # Execute each line of code in the REPL
-            for line in code_lines:
-                persistent_console.push(line)
-        result = output.getvalue()
-
-    except Exception as e:
-        result = str(e)
-
-    return result
-
-
 @app.post("/repl")
 def repl(request: CodeExecutionRequest):
     """
@@ -115,9 +85,14 @@ def repl(request: CodeExecutionRequest):
     Returns:
         dict: The result of the code execution.
     """
-    logger.info(f"Executing REPL with request: {request}")
+    logger.info(f"Received request for REPL execution: {request}")
+    
+    executor = executors.get(request.language)
+    if executor is None:
+        return {"error": "Language not supported"}
+    
     try:
-        code_output = execute_code_in_repl(request.code)
+        code_output = executor.execute(request.code)
         logger.info(f"REPL execution result: {code_output}")
         response = {"result": code_output.strip()}
     except Exception as e:
