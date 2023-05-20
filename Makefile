@@ -1,14 +1,12 @@
-# Heroku
-# make heroku-login
-# make heroku-push
+.PHONY: build-docker run-docker remove-docker
 
-HEROKU_APP = codesherpa
+build-docker:
+	docker build -t codesherpa:localserver .
 
-heroku-push:
-	docker buildx build --platform linux/amd64 -t ${HEROKU_APP} .
-	docker tag ${HEROKU_APP} registry.heroku.com/${HEROKU_APP}/web
-	docker push registry.heroku.com/${HEROKU_APP}/web
-	heroku container:release web -a ${HEROKU_APP}
+run-docker:
+	docker run -p 3333:3333 -v codesherpa-uploads:/app/static/images --name localserver codesherpa:localserver
 
-heroku-login:
-	heroku container:login
+remove-docker:
+	docker rm -f localserver || true
+
+dev: remove-docker build-docker run-docker

@@ -1,21 +1,24 @@
-import subprocess
-from typing import List
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+"""
+A local server script to handle REPL and command execution requests.
+"""
+
 import io
-import json
 import sys
 import code
+import subprocess
 from contextlib import redirect_stderr, redirect_stdout
-from models.api import CodeExecutionRequest, CommandExecutionRequest
-import uvicorn
-from loguru import logger
 
-logger.remove()
-logger.add(sys.stderr, level="INFO")
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from loguru import logger
+import uvicorn
+
+from models.api import CodeExecutionRequest, CommandExecutionRequest
+
+
+logger.configure(handlers=[{"sink": sys.stderr, "format": "<green>{time}</green> <level>{message}</level>", "colorize": True}])
 
 app = FastAPI()
 
@@ -38,31 +41,53 @@ app.add_middleware(
 
 @app.get("/.well-known/ai-plugin.json")
 async def get_manifest():
+    """
+    Endpoint to serve the manifest file.
+    """
     file_path = "./localserver/ai-plugin.json"
     return FileResponse(file_path, media_type="application/json")
 
 
 @app.get("/.well-known/logo.png")
 async def get_logo():
+    """
+    Endpoint to serve the logo file.
+    """
     file_path = "./localserver/logo.png"
     return FileResponse(file_path, media_type="text/json")
 
 
 @app.get("/.well-known/openapi.yaml")
 async def get_openapi():
+    """
+    Endpoint to serve the openapi specification file.
+    """
     file_path = "./localserver/openapi.yaml"
     return FileResponse(file_path, media_type="text/json")
 
 persistent_console = code.InteractiveConsole()
 
-def execute_code_in_repl(code_list: List[str]) -> str:
-    logger.info(f"Executing code in REPL: {code_list}")
+def execute_code_in_repl(code: str) -> str:
+    """
+    Executes the given code string in a REPL environment and returns the result.
+    
+    Args:
+        code (str): The code to execute.
+
+    Returns:
+        str: The result of the code execution.
+    """
+    logger.info(f"Executing code in REPL - this is an update: {code}")
     output = io.StringIO()
+
+    # Split the code into lines
+    code_lines = code.split('\n')
 
     try:
         with redirect_stdout(output), redirect_stderr(output):
-            for code_line in code_list:
-                persistent_console.push(code_line)
+            # Execute each line of code in the REPL
+            for line in code_lines:
+                persistent_console.push(line)
         result = output.getvalue()
 
     except Exception as e:
@@ -70,8 +95,18 @@ def execute_code_in_repl(code_list: List[str]) -> str:
 
     return result
 
+
 @app.post("/repl")
 def repl(request: CodeExecutionRequest):
+    """
+    Endpoint to execute code in a REPL environment.
+    
+    Args:
+        request (CodeExecutionRequest): The request object containing the code to execute.
+
+    Returns:
+        dict: The result of the code execution.
+    """
     logger.info(f"Executing REPL with request: {request}")
     try:
         code_output = execute_code_in_repl(request.code)
@@ -85,6 +120,15 @@ def repl(request: CodeExecutionRequest):
     return response
 
 async def execute_command(command: str) -> str:
+    """
+    Executes the given command in a shell and returns the result.
+    
+    Args:
+        command (str): The command to execute.
+
+    Returns:
+        str: The result of the command execution.
+    """
     try:
         result = subprocess.run(
             command.split(), capture_output=True, text=True)
@@ -95,6 +139,15 @@ async def execute_command(command: str) -> str:
 
 @app.post("/command")
 async def command_endpoint(command_request: CommandExecutionRequest):
+    """
+    Endpoint to execute a shell command.
+    
+    Args:
+        command_request (CommandExecutionRequest): The request object containing the command to execute.
+
+    Returns:
+        dict: The result of the command execution.
+    """
     logger.info(f"Executing command with request: {command_request}")
     try:
         command_result = await execute_command(command_request.command)
@@ -103,6 +156,9 @@ async def command_endpoint(command_request: CommandExecutionRequest):
     except Exception as e:
         logger.error(f"Error in command execution: {e}")
         return {"error": str(e)}
-    
+
 def start():
-    uvicorn.run("localserver.main:app", host="localhost", port=PORT, reload=True)
+    """
+    Starts the FastAPI server.
+    """
+    uvicorn.run("localserver.main:app", host="0.0.0.0", port=PORT, reload=True)
