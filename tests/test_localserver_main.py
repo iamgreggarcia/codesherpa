@@ -6,7 +6,7 @@ from localserver.main import app
 client = TestClient(app)
 
 @pytest.mark.parametrize("language, code, expected_output", [
-    ("python310", "print('Hello, Python!')", "Hello, Python!"),
+    ("python", "print('Hello, Python!')", "Hello, Python!"),
     ("c++", '#include<iostream>\nint main() { std::cout << "Hello, C++!" << std::endl; return 0; }', "Hello, C++!"),
     ("rust", "fn main() { println!(\"Hello, Rust!\"); }", "Hello, Rust!")
 ])
@@ -22,7 +22,7 @@ def test_repl_unsupported_language():
     assert response.json()["error"] == "Language not supported"
 
 @pytest.mark.parametrize("language, code", [
-    ("python310", "print(1/0)"),
+    ("python", "print(1/0)"),
     ("c++", "#include<iostream>\nint main() { int x = 0; int y = 10 / x; std::cout << y << std::endl; return 0; }"),
     ("rust", "fn main() { let x = 0; let y = 10 / x; println!(\"{}\", y); }")
 ])

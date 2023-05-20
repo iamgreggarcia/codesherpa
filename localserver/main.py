@@ -24,7 +24,7 @@ logger.configure(handlers=[{"sink": sys.stderr, "format": "<green>{time}</green>
 app = FastAPI()
 
 executors = {
-    "python310": PythonExecutor(),
+    "python": PythonExecutor(),
     "c++": CppExecutor(),
     "rust": RustExecutor(),
 }
@@ -95,6 +95,15 @@ def repl(request: CodeExecutionRequest):
         code_output = executor.execute(request.code)
         logger.info(f"REPL execution result: {code_output}")
         response = {"result": code_output.strip()}
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error in REPL execution: {e}. Return code: {e.returncode}. Output: {e.output}")
+        response = {
+            "error": str(e),
+            "returnCode": e.returncode,
+            "command": ' '.join(e.cmd),
+            "output": e.output
+        }
+        return response
     except Exception as e:
         logger.error(f"Error in REPL execution: {e}")
         response = {"error": str(e)}
@@ -116,7 +125,16 @@ async def execute_command(command: str) -> str:
         result = subprocess.run(
             command.split(), capture_output=True, text=True)
         return f"Result:\n{result.stdout}"
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error executing command: {e}. Return code: {e.returncode}. Output: {e.output}")
+        return {
+            "error": str(e),
+            "returnCode": e.returncode,
+            "command": ' '.join(e.cmd),
+            "output": e.output
+        }
     except Exception as e:
+        logger.error(f"Error executing command: {e}")
         return f"Error executing command: {str(e)}"
 
 

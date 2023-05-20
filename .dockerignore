@@ -2,7 +2,6 @@
 .gitignore
 
 scripts/
-tests/
 examples/
 *.md
 *.pyc

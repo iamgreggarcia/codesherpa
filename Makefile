@@ -4,7 +4,7 @@ build-docker:
 	docker build -t codesherpa:localserver .
 
 run-docker:
-	docker run -p 3333:3333 -v codesherpa-uploads:/app/static/images --name localserver codesherpa:localserver
+	docker run -p 3333:3333 --name localserver codesherpa:localserver
 
 remove-docker:
 	docker rm -f localserver || true

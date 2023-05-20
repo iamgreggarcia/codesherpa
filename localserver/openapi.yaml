@@ -22,7 +22,7 @@ paths:
                 summary: Python code example
                 value:
                   code: "def greet(name): return f'Hello, {name}!'\n\nprint(greet('Python'))"
-                  language: "python310"
+                  language: "python"
               cppExample:
                 summary: C++ code example
                 value:
@@ -45,7 +45,7 @@ paths:
                     type: string
                     description: The output of the executed code.
         400:
-          description: Bad Request
+          description: Error Details
           content:
             application/json:
               schema:
@@ -53,6 +53,16 @@ paths:
                 properties:
                   error:
                     type: string
+                    description: A brief description of the error.
+                  returnCode:
+                    type: integer
+                    description: The return code of the failed process.
+                  command:
+                    type: string
+                    description: The command that was attempted.
+                  output:
+                    type: string
+                    description: Any output that resulted from the attempted command.
   /command:
     post:
       summary: Run terminal commands
@@ -96,7 +106,7 @@ components:
         language:
           type: string
           description: The programming language of the code to be executed.
-          example: "python310"
+          example: "python"
     CommandExecutionRequest:
       type: object
       properties:
