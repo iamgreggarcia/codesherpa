@@ -1,7 +1,7 @@
 .PHONY: build-docker run-docker remove-docker
 
 build-docker:
-	docker build --no-cache -t codesherpa:localserver .
+	docker build -t codesherpa:localserver .
 
 run-docker:
 	docker run -p 3333:3333 -v codesherpa-uploads:/app/static/images --name localserver codesherpa:localserver
