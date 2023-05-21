@@ -2,6 +2,10 @@
 
 CodeSherpa is a multi-language code-interpreter ChatGPT plugin, designed to execute code and run commands locally in an isolated Docker container.
 
+
+https://github.com/iamgreggarcia/codesherpa/assets/16596972/a42d717c-a996-4622-a5d1-139466cad233
+
+
 ## Updates
 
 - **May 20, 2023**: CodeSherpa now supports multiple programming languages including Python, C++, and Rust.
@@ -92,7 +96,10 @@ For example, here's a request to plot a vector field on a sphere using Python:
   "language": "python"
 }
 ```
-And here's ChatGPT executing the code:
+And here's ChatGPT send the request to CodeSherpa:
+
+
+https://github.com/iamgreggarcia/codesherpa/assets/16596972/1ae9cbda-1f83-4986-9b2f-ea4e2f1d76f1
 
 
 
