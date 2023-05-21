@@ -5,6 +5,9 @@ description = "CodeSherpa is a code-interpreter ChatGPT plugin. It allows ChatGP
 authors = ["Greg Garcia <greg@garcia.casa>"]
 license = "MIT"
 readme = "README.md"
+packages = [
+    { include = "server", from = "." }
+]
 
 
 [tool.poetry.dependencies]
