@@ -25,7 +25,7 @@ Have ChatGPT:
 
 ## Running the Plugin Locally with Docker
 
-1. Build and run the Docker image locally: `make dev`. CodeSherpa will then spring to life at `localhost:3333`.
+1. Build and run the Docker image locally: `make run-docker-localserver`. CodeSherpa will then spring to life at `localhost:3333`.
 2. Navigate to the ChatGPT UI, and access the plugin store.
 3. Select "Develop your own plugin".
 4. Enter `localhost:3333`
