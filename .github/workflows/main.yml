@@ -18,8 +18,8 @@ jobs:
       with:
         context: .
         load: true
-        tags: codesherpa:localserver
+        tags: codesherpa:latest
 
     - name: Run Docker container and execute tests
       run: |
-        docker run --rm codesherpa:localserver make test
+        docker run --rm codesherpa:latest pytest tests/
