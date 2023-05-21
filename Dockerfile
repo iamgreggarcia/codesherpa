@@ -37,7 +37,4 @@ ENV PYTHONPATH=/app
 # Copy over all the other files
 COPY . /app/
 
-# Just for debugging, let's list the contents of /app and /app/localserver
-RUN ls -al /app && ls -al /app/localserver
-
 CMD ["python3", "-c", "import localserver.main; localserver.main.start()"]
