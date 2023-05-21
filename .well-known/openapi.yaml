@@ -1,42 +1,38 @@
 openapi: 3.0.1
 info:
   title: CodeSherpa
-  description: CodeSherpa is a tool that allows you to execute Python code in a REPL-like environment and returns the output or error message. Please note that there is no persistence between calls.
-  version: 1.0.0
+  description: CodeSherpa is a tool that allows you to execute Python code in a REPL session, maintaining the state between requests, run terminal commands, and returns the output or error message.
+  version: "v1"
 servers:
-  - url: https://codesherpa.dev/
+  - url: http://codesherpa.dev
 paths:
   /repl:
     post:
-      summary: Execute Python code.
-      description: Executes the provided Python code and returns the output or error message.
+      summary: Execute code in a REPL-session like environment.
+      description: Executes the provided code in a specified language in a REPL-like environment, maintaining the state between requests, and returns the output or error message.
       operationId: executeReplCode
-      x-oaiMeta:
-        name: Execute Python code
-        group: execution
-        path: repl
-        examples:
-          curl: |
-            curl https://www.codesherpa.dev/repl \
-              -H 'Content-Type: application/json' \
-              -d '{
-                "code": [
-                  "x = 5",
-                  "print(x)"
-                ]
-              }'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                code:
-                  type: array
-                  items:
-                    type: string
-                  description: A list of strings representing individual lines of the Python code to be executed.
+              $ref: "#/components/schemas/CodeExecutionRequest"
+            examples:
+              pythonExample:
+                summary: Python code example
+                value:
+                  code: "def greet(name): return f'Hello, {name}!'\n\nprint(greet('Python'))"
+                  language: "python"
+              cppExample:
+                summary: C++ code example
+                value:
+                  code: "#include<iostream>\n\nint main() {\n  std::string name = \"C++\";\n  std::cout << \"Hello, \" << name << \"!\" << std::endl;\n  return 0;\n}"
+                  language: "c++"
+              rustExample:
+                summary: Rust code example
+                value:
+                  code: "fn main() {\n  let name = \"Rust\";\n  println!(\"Hello, {}!\", name);\n}"
+                  language: "rust"
       responses:
         200:
           description: Execution result
@@ -49,6 +45,47 @@ paths:
                     type: string
                     description: The output of the executed code.
         400:
+          description: Error Details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: A brief description of the error.
+                  returnCode:
+                    type: integer
+                    description: The return code of the failed process.
+                  command:
+                    type: string
+                    description: The command that was attempted.
+                  output:
+                    type: string
+                    description: Any output that resulted from the attempted command.
+  /command:
+    post:
+      summary: Run terminal commands
+      description: Runs the provided terminal command and returns the output or error message.
+      operationId: runCommand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommandExecutionRequest"
+      responses:
+        200:
+          description: Execution result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    description: The output of the executed command.
+        400:
           description: Bad Request
           content:
             application/json:
@@ -57,17 +94,23 @@ paths:
                 properties:
                   error:
                     type: string
-                  suggestion:
-                    type: string
-          x-oaiMeta:
-            parameters: |
-              {
-                "code": [
-                  "x = 5",
-                  "print(x)"
-                ]
-              }
-            response: |
-              {
-                "result": "5"
-              }
+components:
+  schemas:
+    CodeExecutionRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The code to be executed in the REPL-like environment.
+          example: "print('Hello, world!')"
+        language:
+          type: string
+          description: The programming language of the code to be executed.
+          example: "python"
+    CommandExecutionRequest:
+      type: object
+      properties:
+        command:
+          type: string
+          description: The terminal command to be executed.
+          example: 'echo "Hello, terminal!"'
