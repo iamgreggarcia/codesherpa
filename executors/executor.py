@@ -11,10 +11,10 @@ class PythonExecutor(Executor):
         with open("script.py", "w") as f:
             f.write(code)
         try:
-            output = subprocess.run(["python3", "script.py"], capture_output=True, text=True, check=True)
+            output = subprocess.run(["python3.10", "script.py"], capture_output=True, text=True, check=True)
             return output.stdout
         except subprocess.CalledProcessError as e:
-            raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.output)
+            raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.stderr)
 
 class CppExecutor(Executor):
     def execute(self, code: str) -> str:
@@ -25,7 +25,8 @@ class CppExecutor(Executor):
             output = subprocess.run(["./a.out"], capture_output=True, text=True, check=True)
             return output.stdout
         except subprocess.CalledProcessError as e:
-            raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.output)
+            # Here we include e.stderr in the output.
+            raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.stderr)
 
 class RustExecutor(Executor):
     def execute(self, code: str) -> str:
@@ -36,4 +37,5 @@ class RustExecutor(Executor):
             output = subprocess.run(["./script"], capture_output=True, text=True, check=True)
             return output.stdout
         except subprocess.CalledProcessError as e:
-            raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.output)
+            # Here we include e.stderr in the output.
+            raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.stderr)

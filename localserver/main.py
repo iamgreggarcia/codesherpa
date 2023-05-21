@@ -162,4 +162,4 @@ def start():
     """
     Starts the FastAPI server.
     """
-    uvicorn.run("localserver.main:app", host="0.0.0.0", port=PORT, reload=True)
+    uvicorn.run("localserver.main:app", host="0.0.0.0", port=PORT, reload=False)
