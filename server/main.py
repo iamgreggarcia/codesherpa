@@ -34,8 +34,6 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/.well-known", StaticFiles(directory=".well-known"), name="well-known")
 
-persistent_console = code.InteractiveConsole()
-
 @app.post("/repl")
 @limiter.limit("5/minute")
 async def repl(request: Request, code_execution_request: CodeExecutionRequest):
