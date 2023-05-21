@@ -12,7 +12,7 @@ import uvicorn
 
 from models.api import CodeExecutionRequest, CommandExecutionRequest
 from executors.executor import PythonExecutor, CppExecutor, RustExecutor 
-from config import API_VERSION
+from .config import API_VERSION
 
 logger.configure(handlers=[{"sink": sys.stderr, "format": "<green>{time}</green> <level>{message}</level>", "colorize": True}])
 
@@ -45,6 +45,7 @@ _SERVICE_AUTH_KEY = os.environ.get("SERVICE_AUTH_KEY")
 
 def assert_auth_header(req: Request):
     """Asserts the presence of the correct authorization header in the request."""
+    logger.info(f"Received request with headers: {req.headers}")
     assert req.headers.get(
         "Authorization", None) == f"Bearer {_SERVICE_AUTH_KEY}"
 
@@ -69,12 +70,13 @@ async def get_openapi():
 persistent_console = code.InteractiveConsole()
 
 @app.post(f"{API_VERSION}/repl")
-def repl(request: CodeExecutionRequest):
+def repl(request: Request, code_exec_req: CodeExecutionRequest):
     """Executes code in a REPL environment and returns the result."""
     assert_auth_header(request)
-    logger.info(f"Received request for REPL execution: {request}")
-    
-    executor = executors.get(request.language)
+    logger.info(f"Received request for REPL execution: {code_exec_req}")
+
+    executor = executors.get(code_exec_req.language)
+
     if executor is None:
         return {"error": "Language not supported"}
     
@@ -99,9 +101,9 @@ def repl(request: CodeExecutionRequest):
     return response
 
 @app.post(f"{API_VERSION}/command")
-async def command_endpoint(command_request: CommandExecutionRequest):
+async def command_endpoint(request: Request, command_request: CommandExecutionRequest):
     """Executes a shell command and returns the result."""
-    assert_auth_header(command_request)
+    assert_auth_header(request)
     logger.info(f"Executing command with request: {command_request}")
     try:
         command_result = await execute_command(command_request.command)
