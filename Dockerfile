@@ -1,9 +1,6 @@
 # Base Ubuntu Image
 FROM ubuntu:22.04
 
-# Set server variable
-ARG server=localserver
-
 # Update and install necessary compilers/interpreters
 RUN apt-get update && apt-get install -y \
     python3.10 \
@@ -39,5 +36,3 @@ ENV PYTHONPATH=/app
 
 # Copy over all the other files
 COPY . /app/
-
-CMD python3 -c "import ${server}.main; ${server}.main.start()"
