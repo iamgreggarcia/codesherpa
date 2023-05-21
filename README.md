@@ -1,14 +1,16 @@
 # CodeSherpa
 
-CodeSherpa is a Python code-interpreter ChatGPT plugin, specifically designed to execute Python code and run commands locally in an isolated Docker container.
+CodeSherpa is a multi-language code-interpreter ChatGPT plugin, designed to execute code and run commands locally in an isolated Docker container.
 
-<https://user-images.githubusercontent.com/16596972/236653720-945cfae8-6183-4c4b-bb5c-86663a0a06a6.MP4>
+## Updates
+
+- **May 20, 2023**: CodeSherpa now supports multiple programming languages including Python, C++, and Rust.
 
 ## Features
 
 Have ChatGPT:
 
-- Execute Python in an isolated Docker container, maintaining the state between requests.
+- Execute code in an isolated Docker container, maintaining the state between requests. Supported languages include Python, C++, and Rust.
 - Run terminal commands
 
 ## Installation
@@ -28,20 +30,38 @@ Have ChatGPT:
 
 ### POST `/repl`
 
-Executes the provided Python code in a REPL-like environment, maintaining the state between requests, and returns the output or error message.
+Executes the provided code in a REPL-like environment, maintaining the state between requests, and returns the output or error message.
 
 #### Request Body
 
 | Parameter | Type   | Description                                                      |
 |-----------|--------|------------------------------------------------------------------|
-| code      | string | The Python code to be executed in the REPL-like environment.     |
+| code      | string | The code to be executed in the REPL-like environment.            |
+| language  | string | The programming language of the code to be executed.             |
 
+#### Supported Languages
+
+| Language | Language Parameter |
+|----------|--------------------|
+| Python   | python             |
+| C++      | c++                |
+| Rust     | rust               |
 #### Response
+
+**HTTP 200**
 
 | Parameter | Type   | Description                           |
 |-----------|--------|---------------------------------------|
 | result    | string | The output of the executed code.      |
-| error     | string | Error message if there is an error.   |
+
+**HTTP 400**
+
+| Parameter  | Type    | Description                           |
+|------------|---------|---------------------------------------|
+| error      | string  | A brief description of the error.     |
+| returnCode | integer | The return code of the failed process.|
+| command    | string  | The command that was attempted.       |
+| output     | string  | Any output that resulted from the attempted command. |
 
 ### POST `/command`
 
@@ -62,18 +82,18 @@ Runs the provided terminal command and returns the output or error message.
 
 ## Usage
 
-To interact with the CodeSherpa API, use HTTP requests to the corresponding endpoints. For example, to execute Python code in the REPL-like environment, send a POST request to the `/repl` endpoint with a JSON object containing the `code` key and the Python code as a string.
+To interact with the CodeSherpa API, use HTTP requests to the corresponding endpoints. To execute code in the REPL-like environment, send a POST request to the `/repl` endpoint with a JSON object containing the `code` key and the `language` key.
 
-Here's an example:
+For example, here's a request to plot a vector field on a sphere using Python:
 
 ```json
 {
-  "code": "import pandas as pd\nimport numpy as np\nnp.random.seed(0)\ndf = pd.DataFrame({'A': np.random.rand(100), 'B': np.random.rand(100)})\ndf['target'] = df['A'] + 2*df['B']\ndf.head()"
+  "code": "import numpy as np\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\n\n# Define the number of vectors along each dimension\nn_vectors = 20\n\n# Define the sphere\nphi = np.linspace(0, np.pi, n_vectors)\ntheta = np.linspace(0, 2 * np.pi, n_vectors)\nphi, theta = np.meshgrid(phi, theta)\nx = np.sin(phi) * np.cos(theta)\ny = np.sin(phi) * np.sin(theta)\nz = np.cos(phi)\n\n# Define the vector field\nvx = np.sin(phi) * np.cos(theta)\nvy = np.sin(phi) * np.sin(theta)\nvz = np.cos(phi)\n\n# Create the figure\nfig = plt.figure(figsize=(8, 8))\nax = fig.add_subplot(111, projection='3d')\n\n# Plot the sphere surface\nax.plot_surface(x, y, z, color='b', alpha=0.3)\n\n# Plot the vector field\nax.quiver(x, y, z, vx, vy, vz, length=0.1, normalize=True)\n\n# Set the aspect ratio\nax.set_box_aspect([1, 1, 1])\n\nplt.savefig('static/images/vector_field.png')",
+  "language": "python"
 }
 ```
 And here's ChatGPT executing the code:
 
-<https://user-images.githubusercontent.com/16596972/236653729-5f922402-b538-4c92-a299-64a57a57d141.MP4>
 
 
 To run terminal commands, send a POST request to the `/command` endpoint with a JSON object containing the `command` key and the terminal command to execute.
