@@ -32,7 +32,25 @@ docker pull ghcr.io/iamgreggarcia/codesherpa:latest
 docker run -p 3333:3333 ghcr.io/iamgreggarcia/codesherpa:latest python3 -c "import localserver.main; localserver.main.start()"
 ```
 
-**Option 2: Using the repository**
+**Option 2: Using the repository and Make commands**
+
+```bash
+# Clone the repository
+git clone https://github.com/iamgreggarcia/codesherpa.git
+
+# Navigate to the repository directory
+cd codesherpa
+
+# Build the Docker image using Make
+make build-docker
+
+# Run the Docker image locally
+make run-docker-localserver
+```
+
+**Option 3: Using the repository and Docker commands**
+
+Instead of Make commands, you can use the following Docker commands directly:
 
 ```bash
 # Clone the repository
