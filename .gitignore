@@ -10,3 +10,5 @@ __pycache__/
 
 # app.yaml
 app.yaml
+.vscode/settings.json
+.vscode/settings.json
