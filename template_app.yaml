@@ -1,0 +1,7 @@
+runtime: custom
+env: flex
+service: my-service
+
+env_variables:
+  PROJECT_ID: "YOUR_PROJECT_ID"
+  SECRET_ID: "YOUR_SECRET_ID"

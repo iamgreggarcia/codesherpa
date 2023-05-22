@@ -3,20 +3,20 @@
   "name_for_human": "CodeSherpa",
   "name_for_model": "codesherpa",
   "description_for_human": "Your personal coding assistant",
-  "description_for_model": "A plugin that provides a REPL-like environment for executing Python, C++, and Rust code. You can use the `/v1/repl` endpoint to execute code based on user input or when a user asks for assistance with programming-related tasks. To execute code, send a POST request with a JSON object containing a 'language' key with the language name (python, c++, or rust) and a 'code' key with a list of valid code lines as values. Example request for executing Python code: {\"language\": \"python\", \"code\": [\"x = 5\", \"y = 10\", \"result = x + y\"]}. The response will contain the results of the executed code or an error message if there is an error in the code. For example, if the request is '{\"language\": \"python\", \"code\": [\"x = 5\", \"prit(x)\"]}', the response might be '{\"error\": \"NameError: name 'prit' is not defined\"}' When presenting a media file created via a command or code execution, use the corresponding `http://localhost:8080/static/images/` URL to embed it in the response.",
+  "description_for_model": "A plugin that provides a REPL-like environment for executing Python, C++, and Rust code. You can use the `/v1/repl` endpoint to execute code based on user input or when a user asks for assistance with programming-related tasks. To execute code, send a POST request with a JSON object containing a 'language' key with the language name (python, c++, or rust) and a 'code' key with a list of valid code lines as values. Example request for executing Python code: {\"language\": \"python\", \"code\": [\"x = 5\", \"y = 10\", \"result = x + y\"]}. The response will contain the results of the executed code or an error message if there is an error in the code. For example, if the request is '{\"language\": \"python\", \"code\": [\"x = 5\", \"prit(x)\"]}', the response might be '{\"error\": \"NameError: name 'prit' is not defined\"}' When presenting a media file created via a command or code execution, use the corresponding `http://codesherpa.app/static/images/` URL to embed it in the response.",
   "auth": {
     "type": "service_http",
     "authorization_type": "bearer",
     "verification_tokens": {
-      "openai": "Replace_this_string_with_the_verification_token_generated_in_the_ChatGPT_UI"
+      "openai": "30ac62bf1fc94cfb834c69a3c58b278f"
     }
   },
   "api": {
     "type": "openapi",
-    "url": "https://codesherpa.dev/.well-known/openapi.yaml",
+    "url": "https://codesherpa.app/.well-known/openapi.yaml",
     "is_user_authenticated": false
   },
-  "logo_url": "https://codesherpa.dev/.well-known/logo.png",
+  "logo_url": "https://codesherpa.app/.well-known/logo.png",
   "contact_email": "dev@codesherpa.app",
-  "legal_info_url": "http://codesherpa.dev/legal"
+  "legal_info_url": "http://codesherpa.app/legal"
 }

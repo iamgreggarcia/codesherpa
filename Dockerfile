@@ -28,6 +28,8 @@ RUN pip install poetry \
 # Install testing tools
 RUN pip install pytest pytest-cov pytest-asyncio
 
+RUN pip install google-cloud-secret-manager
+
 # Create directory for uploads
 RUN mkdir -p /app/static/images
 
@@ -36,3 +38,5 @@ ENV PYTHONPATH=/app
 
 # Copy over all the other files
 COPY . /app/
+
+CMD ["python3", "-c", "import server.main; server.main.start()"]

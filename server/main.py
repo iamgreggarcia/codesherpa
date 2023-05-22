@@ -11,6 +11,7 @@ from loguru import logger
 import uvicorn
 
 from models.api import CodeExecutionRequest, CommandExecutionRequest
+from utils.google import SERVICE_AUTH_KEY
 from executors.executor import PythonExecutor, CppExecutor, RustExecutor 
 from .config import API_VERSION
 
@@ -24,10 +25,10 @@ executors = {
     "rust": RustExecutor(),
 }
 
-PORT = 8080
+PORT = int(os.getenv('PORT', 8080))
 
 origins = [
-    f"http://0.0.0.0:{PORT}",
+    f"http://127.0.0.1:{PORT}",
     "https://chat.openai.com",
 ]
 
@@ -41,7 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_SERVICE_AUTH_KEY = os.environ.get("SERVICE_AUTH_KEY")
+_SERVICE_AUTH_KEY = SERVICE_AUTH_KEY
 
 def assert_auth_header(req: Request):
     """Asserts the presence of the correct authorization header in the request."""
@@ -52,19 +53,19 @@ def assert_auth_header(req: Request):
 @app.get("/.well-known/ai-plugin.json")
 async def get_manifest():
     """Returns the manifest file."""
-    file_path = "./server/ai-plugin.json"
+    file_path = "/app/.well-known/ai-plugin.json"
     return FileResponse(file_path, media_type="application/json")
 
 @app.get("/.well-known/logo.png")
 async def get_logo():
     """Returns the logo file."""
-    file_path = "./server/logo.png"
+    file_path = "/app/.well-known/logo.png"
     return FileResponse(file_path, media_type="text/json")
 
 @app.get("/.well-known/openapi.yaml")
 async def get_openapi():
     """Returns the OpenAPI specification file."""
-    file_path = "./server/openapi.yaml"
+    file_path = "/app/.well-known/openapi.yaml"
     return FileResponse(file_path, media_type="text/json")
 
 persistent_console = code.InteractiveConsole()

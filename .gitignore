@@ -7,3 +7,6 @@ __pycache__/
 # .env
 .env
 .pytest_cache/
+
+# app.yaml
+app.yaml
