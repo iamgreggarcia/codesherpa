@@ -9,85 +9,54 @@ CodeSherpa is a multi-language code-interpreter ChatGPT plugin. It's designed to
 - **May 22, 2023**: Refactored README to provide clear and concise instructions for building and running CodeSherpa.
 - **May 20, 2023**: CodeSherpa now supports multiple programming languages, including Python, C++, and Rust.
 
-## Features
+## Quickstart
 
-CodeSherpa allows you to:
-- Execute code within a Docker container, maintaining the state between requests. Supported languages include Python, C++, and Rust.
-- Run terminal commands
+### Prerequisites
 
-## Prerequisites
+Ensure the following software is installed on your system:
 
-Before installing CodeSherpa, ensure you have the following software installed on your system:
 - Python 3.10
 - Docker
 
-## Installation
+### Installation and Running CodeSherpa
 
-You can install CodeSherpa in one of the two ways: by pulling the Docker image from Github Packages or by cloning the repository.
+Here are the steps to get CodeSherpa up and running swiftly:
 
-### Option 1: Pull the Docker image from Github Packages
+**Option 1: Using Docker image from Github Packages**
 
 ```bash
+# Pull the Docker image
 docker pull ghcr.io/iamgreggarcia/codesherpa:latest
+
+# Run the Docker image locally
+docker run -p 3333:3333 ghcr.io/iamgreggarcia/codesherpa:latest python3 -c "import localserver.main; localserver.main.start()"
 ```
 
-### Option 2: Clone the repository
-
-1. Clone the repository: 
+**Option 2: Using the repository**
 
 ```bash
+# Clone the repository
 git clone https://github.com/iamgreggarcia/codesherpa.git
-```
 
-2. Navigate to the repository directory: 
-
-```bash
+# Navigate to the repository directory
 cd codesherpa
-```
 
-## Building and Running CodeSherpa
-
-After installation, you can build and run CodeSherpa using either the provided `make` commands or directly using Docker.
-
-### Option 1: Using `make` commands
-
-1. Build the Docker image:
-
-```bash
-make build-docker
-```
-
-2. Run the Docker image locally:
-
-```bash
-make run-docker-localserver
-```
-
-CodeSherpa will then be accessible at [localhost:3333](http://localhost:3333).
-
-### Option 2: Using Docker directly
-
-If you cloned the repository, follow these steps:
-
-1. Build the Docker image:
-
-```bash
+# Build the Docker image
 docker build -t codesherpa .
-```
 
-2. Run the Docker image locally:
-
-```bash
+# Run the Docker image locally
 docker run -p 3333:3333 codesherpa python3 -c "import localserver.main; localserver.main.start()"
 ```
 
-After successfully running the above commands, CodeSherpa will be available at [localhost:3333](http://localhost:3333).
+Whichever option you choose, CodeSherpa will be accessible at [localhost:3333](http://localhost:3333).
 
-## Connecting CodeSherpa to ChatGPT
+### Connecting CodeSherpa to ChatGPT
 
 1. Navigate to the ChatGPT UI, and access the plugin store.
 2. Select "Develop your own plugin".
 3. In the plugin URL input, enter `localhost:3333`. Your ChatGPT should now be able to use CodeSherpa's features.
+
+For more detailed information on API endpoints, usage, contributing, future work, and license, refer to the respective sections below.
 
 ## API Endpoints
 
