@@ -2,7 +2,7 @@
 
 CodeSherpa is a multi-language code-interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container.
 
-![CodeSherpa](https://github.com/iamgreggarcia/codesherpa/assets/16596972/a42d717c-a996-4622-a5d1-139466cad233.png)
+<https://github.com/iamgreggarcia/codesherpa/assets/16596972/a42d717c-a996-4622-a5d1-139466cad233>
 
 ## Recent Updates
 
