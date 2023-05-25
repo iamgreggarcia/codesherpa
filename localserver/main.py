@@ -7,6 +7,7 @@ import sys
 import code
 import subprocess
 import shutil
+import signal
 from typing import List
 from contextlib import redirect_stderr, redirect_stdout
 
@@ -179,9 +180,15 @@ async def command_endpoint(command_request: CommandExecutionRequest):
     except Exception as e:
         logger.error(f"Error in command execution: {e}")
         return {"error": str(e)}
-
+    
 def start():
     """
     Starts the FastAPI server.
     """
+    def shutdown():
+        logger.info("Shutting down server...")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, lambda signum, frame: shutdown())
+
     uvicorn.run("localserver.main:app", host="0.0.0.0", port=PORT, reload=False)

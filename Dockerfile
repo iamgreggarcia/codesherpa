@@ -25,6 +25,9 @@ RUN pip install poetry \
     && poetry export -f requirements.txt --output requirements.txt --without-hashes \
     && pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
 
+# Install data analysis libraries
+RUN pip install pandas numpy matplotlib seaborn scipy sklearn openpyxl
+
 # Install testing tools
 RUN pip install pytest pytest-cov pytest-asyncio
 
