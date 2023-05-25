@@ -7,3 +7,6 @@ examples/
 *.pyc
 .dockerignore
 Dockerfile
+
+# Exclude entire /frontend directory
+/frontend/

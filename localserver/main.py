@@ -35,6 +35,7 @@ PORT = 3333
 
 origins = [
     f"http://localhost:{PORT}",
+    "http://localhost:3001",
     "https://chat.openai.com",
 ]
 
@@ -60,14 +61,20 @@ async def upload_file(file: UploadFile = File(...)):
         dict: The result of the file upload process.
     """
     try:
-        with open(file.filename, "wb") as buffer:
+        file_location = f"static/{file.filename}"
+        with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
         logger.info(f"File uploaded: {file.filename}")
-        return {"message": "File uploaded successfully"}
+        
+        # Construct the URL of the uploaded file
+        url = f"http://localhost:{PORT}/{file_location}"
+        
+        return {"message": "File uploaded successfully", "url": url}
     except Exception as e:
         logger.error(f"Error uploading file: {e}")
         return {"error": str(e)}
+
 
 @app.get("/.well-known/ai-plugin.json")
 async def get_manifest():

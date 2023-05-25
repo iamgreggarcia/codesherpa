@@ -12,3 +12,8 @@ __pycache__/
 app.yaml
 .vscode/settings.json
 .vscode/settings.json
+
+# Node.js / Frontend
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
