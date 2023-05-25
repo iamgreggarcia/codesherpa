@@ -47,30 +47,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
-# New endpoint for handling file uploads
 @app.post("/upload")
-async def upload_files(files: List[UploadFile] = File(...), max_total_size: int = 1000000):
+async def upload_file(file: UploadFile = File(...)):
     """
-    Endpoint to upload multiple files with an upper bound on total file size.
+    Endpoint to upload a file.
 
     Args:
-        files (List[UploadFile]): List of uploaded files.
-        max_total_size (int): Maximum total size of uploaded files in bytes.
+        file (UploadFile): The uploaded file.
 
     Returns:
         dict: The result of the file upload process.
     """
-    total_size = sum(file.file._file.tell() for file in files)
-    if total_size > max_total_size:
-        return {"error": "Total file size exceeds the limit"}
-
-    for file in files:
+    try:
         with open(file.filename, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-    return {"message": "Files uploaded successfully", "total_size": total_size}
+        logger.info(f"File uploaded: {file.filename}")
+        return {"message": "File uploaded successfully"}
+    except Exception as e:
+        logger.error(f"Error uploading file: {e}")
+        return {"error": str(e)}
 
 @app.get("/.well-known/ai-plugin.json")
 async def get_manifest():
