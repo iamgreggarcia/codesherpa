@@ -64,18 +64,24 @@ export default function Uploader() {
               const { url } = (await res.json())
               toast(
                 (t) => (
-                  <div className="relative">
+                  <div className="relative" style={{ maxWidth: '90vw', width: '500px' }}>
                     <div className="p-2">
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-gray-900" style={{ whiteSpace: 'normal' }}>
                         File uploaded!
                       </p>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <p className="mt-1 text-sm text-gray-500" style={{ whiteSpace: 'normal' }}>
                         Your file has been uploaded to{' '}
                         <a
-                          className="font-medium text-gray-900 underline"
+                          className="font-medium text-gray-900 underline block overflow-hidden text-overflow-ellipsis"
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
+                          style={{
+                            display: 'block',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                          }}
                         >
                           {url}
                         </a>
@@ -93,10 +99,10 @@ export default function Uploader() {
                         <path
                           fillRule="evenodd"
                           d="M5.293 5.293a1 1 0 011.414 0L10
-                            8.586l3.293-3.293a1 1 0 111.414 1.414L11.414
-                            10l3.293 3.293a1 1 0 01-1.414 1.414L10
-                            11.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586
-                            10 5.293 6.707a1 1 0 010-1.414z"
+              8.586l3.293-3.293a1 1 0 111.414 1.414L11.414
+              10l3.293 3.293a1 1 0 01-1.414 1.414L10
+              11.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586
+              10 5.293 6.707a1 1 0 010-1.414z"
                           clipRule="evenodd"
                         />
                       </svg>

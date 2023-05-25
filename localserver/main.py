@@ -21,7 +21,15 @@ import uvicorn
 from models.api import CodeExecutionRequest, CommandExecutionRequest
 from executors.executor import PythonExecutor, CppExecutor, RustExecutor
 
-logger.configure(handlers=[{"sink": sys.stderr, "format": "<green>{time}</green> <level>{message}</level>", "colorize": True}])
+logger.configure(
+    handlers=[
+        {
+            "sink": sys.stderr,
+            "format": "<green>{time}</green> <level>{message}</level>",
+            "colorize": True,
+        }
+    ]
+)
 
 app = FastAPI()
 
@@ -49,6 +57,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     """
@@ -61,15 +70,15 @@ async def upload_file(file: UploadFile = File(...)):
         dict: The result of the file upload process.
     """
     try:
-        file_location = f"static/{file.filename}"
+        file_location = f"static/uploads/{file.filename}"
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
         logger.info(f"File uploaded: {file.filename}")
-        
+
         # Construct the URL of the uploaded file
         url = f"http://localhost:{PORT}/{file_location}"
-        
+
         return {"message": "File uploaded successfully", "url": url}
     except Exception as e:
         logger.error(f"Error uploading file: {e}")
@@ -102,13 +111,15 @@ async def get_openapi():
     file_path = "./localserver/openapi.yaml"
     return FileResponse(file_path, media_type="text/json")
 
+
 persistent_console = code.InteractiveConsole()
+
 
 @app.post("/repl")
 def repl(request: CodeExecutionRequest):
     """
     Endpoint to execute code in a REPL environment.
-    
+
     Args:
         request (CodeExecutionRequest): The request object containing the code to execute.
 
@@ -116,35 +127,38 @@ def repl(request: CodeExecutionRequest):
         dict: The result of the code execution.
     """
     logger.info(f"Received request for REPL execution: {request}")
-    
+
     executor = executors.get(request.language)
     if executor is None:
         return {"error": "Language not supported"}
-    
+
     try:
         code_output = executor.execute(request.code)
         logger.info(f"REPL execution result: {code_output}")
         response = {"result": code_output.strip()}
     except subprocess.CalledProcessError as e:
-        logger.error(f"Error in REPL execution: {e}. Return code: {e.returncode}. Output: {e.output}")
+        logger.error(
+            f"Error in REPL execution: {e}. Return code: {e.returncode}. Output: {e.output}"
+        )
         response = {
             "error": str(e),
             "returnCode": e.returncode,
-            "command": ' '.join(e.cmd),
-            "output": e.output
+            "command": " ".join(e.cmd),
+            "output": e.output,
         }
         return response
     except Exception as e:
         logger.error(f"Error in REPL execution: {e}")
         response = {"error": str(e)}
         return response
-    
+
     return response
+
 
 async def execute_command(command: str) -> str:
     """
     Executes the given command in a shell and returns the result.
-    
+
     Args:
         command (str): The command to execute.
 
@@ -152,17 +166,13 @@ async def execute_command(command: str) -> str:
         str: The result of the command execution.
     """
     try:
-        result = subprocess.run(
-            command.split(), capture_output=True, text=True)
+        result = subprocess.run(command.split(), capture_output=True, text=True)
         return f"Result:\n{result.stdout}"
     except subprocess.CalledProcessError as e:
-        logger.error(f"Error executing command: {e}. Return code: {e.returncode}. Output: {e.output}")
-        return {
-            "error": str(e),
-            "returnCode": e.returncode,
-            "command": ' '.join(e.cmd),
-            "output": e.output
-        }
+        logger.error(
+            f"Error executing command: {e}. Return code: {e.returncode}. Output: {e.output}"
+        )
+        return f"Error executing command: {str(e)}"
     except Exception as e:
         logger.error(f"Error executing command: {e}")
         return f"Error executing command: {str(e)}"
@@ -172,7 +182,7 @@ async def execute_command(command: str) -> str:
 async def command_endpoint(command_request: CommandExecutionRequest):
     """
     Endpoint to execute a shell command.
-    
+
     Args:
         command_request (CommandExecutionRequest): The request object containing the command to execute.
 
@@ -187,11 +197,13 @@ async def command_endpoint(command_request: CommandExecutionRequest):
     except Exception as e:
         logger.error(f"Error in command execution: {e}")
         return {"error": str(e)}
-    
+
+
 def start():
     """
     Starts the FastAPI server.
     """
+
     def shutdown():
         logger.info("Shutting down server...")
         sys.exit(0)
