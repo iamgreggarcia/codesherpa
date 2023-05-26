@@ -1,4 +1,4 @@
-.PHONY: build-docker run-docker-localserver run-docker-server remove-docker test
+.PHONY: build-docker run-docker-localserver run-docker-server remove-docker test run-frontend
 
 build-docker:
 	docker build -t codesherpa .
@@ -16,3 +16,6 @@ remove-docker:
 
 test:
 	docker run --rm codesherpa pytest tests/
+
+run-frontend:
+	cd frontend && npm run dev

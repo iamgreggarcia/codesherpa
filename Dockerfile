@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     make \
     git
 
+# Create a symbolic link for Python
+RUN ln -s /usr/bin/python3.10 /usr/bin/python
+
 # Install Rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
@@ -17,26 +20,26 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # Set up working directory
 WORKDIR /app
 
-# Copy Python dependencies and install them
-COPY ./pyproject.toml ./poetry.lock* /tmp/
-RUN pip install poetry \
-    && cd /tmp \
-    && poetry config virtualenvs.create false \
-    && poetry export -f requirements.txt --output requirements.txt --without-hashes \
-    && pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
+COPY ./pyproject.toml ./poetry.lock* /app/
 
-# Install testing tools
-RUN pip install pytest pytest-cov pytest-asyncio
+RUN pip install poetry
 
-RUN pip install google-cloud-secret-manager
+# Create virtual environment and install dependencies
+RUN poetry config virtualenvs.in-project true && \
+    poetry install --no-dev --no-root
 
-# Create directory for uploads
+RUN /app/.venv/bin/pip install pytest pytest-cov pytest-asyncio
+
+RUN /app/.venv/bin/pip install google-cloud-secret-manager 
+
 RUN mkdir -p /app/static/images
 
-# Set PYTHONPATH
+RUN mkdir -p /app/static/uploads
+
 ENV PYTHONPATH=/app
 
-# Copy over all the other files
+ENV PATH="/app/.venv/bin:${PATH}"
+
 COPY . /app/
 
-CMD ["python3", "-c", "import server.main; server.main.start()"]
+CMD ["python", "-c", "import server.main; server.main.start()"]

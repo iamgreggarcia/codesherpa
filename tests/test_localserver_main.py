@@ -1,3 +1,5 @@
+import os
+import tempfile
 import pytest
 from fastapi.testclient import TestClient
 
@@ -31,3 +33,13 @@ def test_repl_execution_error(language, code):
     response = client.post("/repl", json={"language": language, "code": code})
     assert response.status_code == 200
     assert "error" in response.json()
+    
+def test_upload_file():
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(b"test file contents")
+        temp_file.seek(0)
+        response = client.post("/upload", files={"file": temp_file})
+        assert response.status_code == 200
+        assert response.json().get("message") == "File uploaded successfully"
+        assert response.json().get("url") is not None
+        os.remove(temp_file.name)

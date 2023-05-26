@@ -1,5 +1,17 @@
 import abc
+import sys
 import subprocess
+from loguru import logger
+
+logger.configure(
+    handlers=[
+        {
+            "sink": sys.stderr,
+            "format": "<green>{time}</green> <level>{message}</level>",
+            "colorize": True,
+        }
+    ]
+)
 
 class Executor(abc.ABC):
     @abc.abstractmethod
@@ -8,12 +20,15 @@ class Executor(abc.ABC):
 
 class PythonExecutor(Executor):
     def execute(self, code: str) -> str:
+        logger.info("Executing Python code: {}", code)
         with open("script.py", "w") as f:
             f.write(code)
         try:
             output = subprocess.run(["python3.10", "script.py"], capture_output=True, text=True, check=True)
             return output.stdout
         except subprocess.CalledProcessError as e:
+            # log the error
+            logger.error("Error executing Python code: {}", e)
             raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.stderr)
 
 class CppExecutor(Executor):
