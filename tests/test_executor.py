@@ -5,14 +5,15 @@ from executors.executor import PythonExecutor, CppExecutor, RustExecutor
 def test_python_executor():
     # Positive Case
     executor = PythonExecutor()
-    code = "print('Hello, World!')"
+    code = "x = 5\ny = 10\nx*y"
     result = executor.execute(code)
-    assert result == "Hello, World!\n"
+    assert result == "50\n"
 
     # Negative Case
     code = "print('Hello, World!'"
-    with pytest.raises(subprocess.CalledProcessError):
+    with pytest.raises(SyntaxError) as excinfo:
         result = executor.execute(code)
+    assert "'(' was never closed" in str(excinfo.value)
 
 def test_cpp_executor():
     # Positive Case

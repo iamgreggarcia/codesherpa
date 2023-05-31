@@ -112,14 +112,12 @@ async def get_openapi():
     return FileResponse(file_path, media_type="text/json")
 
 
-persistent_console = code.InteractiveConsole()
-
-
 @app.post("/repl")
 def repl(request: CodeExecutionRequest):
     """
     Endpoint to execute code in a REPL environment.
-
+    Note: This endpoint current supports a REPL-like environment for Python only.
+    
     Args:
         request (CodeExecutionRequest): The request object containing the code to execute.
 
@@ -136,23 +134,13 @@ def repl(request: CodeExecutionRequest):
         code_output = executor.execute(request.code)
         logger.info(f"REPL execution result: {code_output}")
         response = {"result": code_output.strip()}
-    except subprocess.CalledProcessError as e:
-        logger.error(
-            f"Error in REPL execution: {e}. Return code: {e.returncode}. Output: {e.output}"
-        )
-        response = {
-            "error": str(e),
-            "returnCode": e.returncode,
-            "command": " ".join(e.cmd),
-            "output": e.output,
-        }
-        return response
     except Exception as e:
         logger.error(f"Error in REPL execution: {e}")
         response = {"error": str(e)}
         return response
 
     return response
+
 
 
 async def execute_command(command: str) -> str:
