@@ -9,7 +9,10 @@ paths:
   /repl:
     post:
       summary: Execute code in a REPL-session like environment.
-      description: Executes the provided code in a specified language in a REPL-like environment, maintaining the state between requests, and returns the output or error message.
+      description: |
+        Executes the provided code in a specified language. Python code is executed in a REPL-like environment, 
+        maintaining the state between requests. Code in C++ and Rust is also supported, but state is not preserved 
+        between requests for these languages.
       operationId: executeReplCode
       requestBody:
         required: true
