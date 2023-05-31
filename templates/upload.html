@@ -60,11 +60,11 @@
         <br /><br />
         <div id="preview"></div>
         <br /><br />
+        <div id="message"></div>
         <button id="clear-button"><i class="fas fa-times"></i> Clear</button>
         <br /><br />
         <input type="submit" value="Upload" id="upload-button" disabled />
     </form>
-    <div id="message"></div>
     <script>
         const fileInput = document.getElementById("file-input");
         const preview = document.getElementById("preview");
@@ -136,6 +136,37 @@
             preview.innerHTML = "";
             clearButton.style.display = "none";
         }
+        document.getElementById('upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById("file-input");
+            const messageDiv = document.getElementById('message');
+            const file = fileInput.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('http://localhost:3333/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        messageDiv.textContent = `Upload successful! File URL: ${data.url}`;
+                    } else if (data.error) {
+                        messageDiv.textContent = `Upload failed with error: ${data.error}`;
+                    }
+                })
+                .catch(error => {
+                    messageDiv.textContent = `Upload failed with error: ${error.message}`;
+                })
+                .finally(() => {
+                    clearSelection();
+                    uploadButton.disabled = true;
+                });
+            }
+        });
     </script>
 </body>
 

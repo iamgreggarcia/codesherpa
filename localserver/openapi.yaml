@@ -97,6 +97,44 @@ paths:
                 properties:
                   error:
                     type: string
+  /upload:
+    post:
+      summary: Upload a file
+      description: Endpoint to upload a file.
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: File upload result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The message indicating the success of the file upload.
+                  url:
+                    type: string
+                    description: The URL of the uploaded file.
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 components:
   schemas:
     CodeExecutionRequest:
