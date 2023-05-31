@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>File Upload</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        form {
+            text-align: center;
+            padding: 1em;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        #preview {
+            width: 100%;
+            height: 200px;
+            overflow: auto;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+
+        #preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #preview .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #clear-button {
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="upload-form" enctype="multipart/form-data">
+        <h1>File Upload</h1>
+        <p>Please select a file to upload (only one file can be uploaded at a time):</p>
+        <input type="file" name="file" id="file-input" />
+        <br /><br />
+        <div id="preview"></div>
+        <br /><br />
+        <button id="clear-button"><i class="fas fa-times"></i> Clear</button>
+        <br /><br />
+        <input type="submit" value="Upload" id="upload-button" disabled />
+    </form>
+    <div id="message"></div>
+    <script>
+        const fileInput = document.getElementById("file-input");
+        const preview = document.getElementById("preview");
+        const clearButton = document.getElementById("clear-button");
+        const uploadButton = document.getElementById("upload-button");
+
+        const MAX_SIZE_MB = 50;
+        const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024; // Convert MB to bytes
+
+        fileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+
+            // Check file size
+            if (file.size > MAX_SIZE_BYTES) {
+                alert(`The selected file is too large. Maximum size is ${MAX_SIZE_MB}MB.`);
+                clearSelection();
+                return;
+            }
+
+            // Clear previous preview
+            preview.innerHTML = "";
+
+            const reader = new FileReader();
+
+            if (file.type.startsWith("image/")) {
+                reader.addEventListener("load", (event) => {
+                    const img = document.createElement("img");
+                    img.src = event.target.result;
+                    preview.appendChild(img);
+                    clearButton.style.display = "inline-block";
+                });
+
+                reader.readAsDataURL(file);
+            } else {
+                const fileInfo = document.createElement("div");
+                fileInfo.classList.add("file-info");
+
+                let icon;
+                if (file.type.startsWith("application/vnd.openxmlformats-officedocument")) {
+                    icon = "fa-file-word"; // For .docx
+                } else if (file.type === "application/pdf") {
+                    icon = "fa-file-pdf";
+                } else if (file.type.startsWith("text/csv") || file.type.startsWith("application/vnd.ms-excel")) {
+                    icon = "fa-file-csv"; // For .csv and .xlsx
+                } else {
+                    icon = "fa-file"; // Default for other file types
+                }
+
+                fileInfo.innerHTML = `<i class="fas ${icon}"></i> <span>${file.name}</span>`;
+                preview.appendChild(fileInfo);
+                clearButton.style.display = "inline-block";
+            }
+            if (fileInput.value != "") {
+                uploadButton.disabled = false;
+            } else {
+                uploadButton.disabled = true;
+            }
+        });
+
+        clearButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            clearSelection();
+            uploadButton.disabled = true;
+        });
+
+        function clearSelection() {
+            // Clear input field, preview, and message
+            fileInput.value = "";
+            preview.innerHTML = "";
+            clearButton.style.display = "none";
+        }
+    </script>
+</body>
+
+</html>

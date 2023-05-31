@@ -8,7 +8,7 @@ from localserver.main import app
 client = TestClient(app)
 
 @pytest.mark.parametrize("language, code, expected_output", [
-    ("python", "print('Hello, Python!')", "Hello, Python!"),
+    ("python", "print('Hello, Python!')", "Hello, Python!\n"),
     ("c++", '#include<iostream>\nint main() { std::cout << "Hello, C++!" << std::endl; return 0; }', "Hello, C++!"),
     ("rust", "fn main() { println!(\"Hello, Rust!\"); }", "Hello, Rust!")
 ])

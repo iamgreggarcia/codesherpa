@@ -41,7 +41,9 @@ class PythonExecutor(Executor):
 
                     # If the node is an expression, print its result.
                     if isinstance(node, ast.Expr):
-                        print(eval(compile(ast.Expression(body=node.value), '<ast>', 'eval'), None, self.locals))
+                        eval_result = eval(compile(ast.Expression(body=node.value), '<ast>', 'eval'), None, self.locals)
+                        if eval_result is not None:
+                            print(eval_result)
         except Exception as e:
             logger.error("Error executing Python code: {}", e)
             return str(e)

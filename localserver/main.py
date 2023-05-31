@@ -2,18 +2,16 @@
 A local server script to handle REPL and command execution requests.
 """
 
-import io
+
 import sys
-import code
 import subprocess
 import shutil
 import signal
 from typing import List
-from contextlib import redirect_stderr, redirect_stdout
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 import uvicorn
@@ -57,6 +55,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/upload")
+async def upload_page(request: Request):
+    return HTMLResponse(content=open("templates/upload.html", "r").read(), status_code=200)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
