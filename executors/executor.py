@@ -1,6 +1,9 @@
 import abc
 import sys
+import io
+import ast
 import subprocess
+from contextlib import redirect_stdout
 from loguru import logger
 
 logger.configure(
@@ -19,17 +22,34 @@ class Executor(abc.ABC):
         pass
 
 class PythonExecutor(Executor):
+    def __init__(self):
+        self.locals = {}
+
     def execute(self, code: str) -> str:
         logger.info("Executing Python code: {}", code)
-        with open("script.py", "w") as f:
-            f.write(code)
+        output = io.StringIO()
+
+        # Parse the code into an AST.
+        tree = ast.parse(code, mode='exec')
+
         try:
-            output = subprocess.run(["python3.10", "script.py"], capture_output=True, text=True, check=True)
-            return output.stdout
-        except subprocess.CalledProcessError as e:
-            # log the error
+            # Redirect standard output to our StringIO instance.
+            with redirect_stdout(output):
+                for node in tree.body:
+                    # Compile and execute each node.
+                    exec(compile(ast.Module(body=[node], type_ignores=[]), '<ast>', 'exec'), None, self.locals)
+
+                    # If the node is an expression, print its result.
+                    if isinstance(node, ast.Expr):
+                        eval_result = eval(compile(ast.Expression(body=node.value), '<ast>', 'eval'), None, self.locals)
+                        if eval_result is not None:
+                            print(eval_result)
+        except Exception as e:
             logger.error("Error executing Python code: {}", e)
-            raise subprocess.CalledProcessError(e.returncode, e.cmd, output=e.stderr)
+            return str(e)
+
+        # Retrieve the output and return it.
+        return output.getvalue()
 
 class CppExecutor(Executor):
     def execute(self, code: str) -> str:
