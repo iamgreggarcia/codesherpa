@@ -180,7 +180,7 @@ Most of us have seen the [ChatGPT Code Interpreter Video Demo](https://openai.co
 https://github.com/iamgreggarcia/codesherpa/assets/16596972/111e7e25-a5b0-4d7e-9ffb-dee5e844cafd
 
 
-- Uploading a [music.csv](https://corgis-edu.github.io/corgis/csv/music/) dataset for analysis and visualization:
+- Uploading a [music.csv](https://corgis-edu.github.io/corgis/csv/music/) dataset for analysis and visualization. [View the ChatGPT conversation](https://chat.openai.com/share/ee480269-ee72-4104-a1fa-2f11e881055b)
 
 
 
