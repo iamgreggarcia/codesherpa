@@ -7,6 +7,8 @@ import sys
 import subprocess
 import shutil
 import signal
+import json
+import textwrap
 from typing import List
 
 from fastapi import FastAPI, File, UploadFile, Request
@@ -55,6 +57,70 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# TODO: clean this up
+description_for_model = textwrap.dedent(f"""
+    codeherpa is a Dockerized FastAPI application that provides a persistent REPL (Read-Eval-Print Loop) session, 
+    command execution, and the ability to interact with the container filesystem in Python. C++ and Rust are available for code execution,
+    but are stateless and do not persist between requests. codesherpa runs on ubuntu:22.04. It has many 
+    
+    ## `/repl` endpoint
+    Through the `/repl` endpoint, you can execute Python code interactively. For example, whenever requested by a user for 
+    assistance with tasks, data analysis and visualizations, creating images, learning programming, etc., you might use the `/repl` endpoint. To execute code, send a 
+    POST request to the `/repl` endpoint containing an escaped JSON object with a 'code' key for the code and a 'language' key for the language 
+    in which the code should be executed. An example request for executing code (in escaped JSON 
+    format) looks like this: 
+    
+    `{{\\\"code\\\": \\\"#include<iostream>\\n\\nint main() {{\\n  std::cout << \\\\\"Hello, 
+    World!\\\\\" << std::endl;\\n  return 0;\\n}}\\\", \\\"language\\\": \\\"c++\\\"}}`. 
+    
+    When a user asks to upload a file, or mention they have a file they want you to analyze, or that they have a question 
+    regarding a spreadsheet, a dataset, etc., present an 'Upload file' link to the user. This link 
+    should point to the url: http://localhost:{PORT}/upload. When a user asks for data analysis, proactively examine the 
+    uploaded file for its contents. Specifically, you should 
+        1. Understand the file type (e.g., CSV, Excel, JSON, etc.) and determine the best way to read it.
+        2. Immediately analyze the shape of the data (e.g., 'I see you've uploaded a CSV file with 100 rows and 5 columns.), write a concise summary of the data (e.g., 'Here is a summary of the data: ...'), and present visualizations of the data (e.g., 'Here are some visualizations of the data: ...').
+            a. Create informative and beautiful visualizations. You have several Python packages at your disposal, including matplotlib and seaborn.
+        3. Present key insights from the data (e.g., 'Here are some key insights from the data: ...').
+ 
+    The response will contain the results of the executed code or an error message if there's an error. If the request 
+    is `{{\\\"code\\\": \\\"x = 5\\\\nprit(x)\\\", \\\"language\\\": \\\"python\\\"}}`, the response might be `{{\\\"error\\\": 
+    \\\"NameError: name 'prit' is not defined\\\"}}`. 
+    
+
+    ## `/command` endpoint
+    To run a terminal command and interact with the Docker container filesystem, send an escaped JSON object with a 'command' key containing the terminal command to the `/command` endpoint. The `/command` endpoint is useful if you need to install a python package, download a file, or perform other tasks that require a terminal command. An example request for executing a command (in escaped JSON format) looks like this:
+
+    `{{\\\"command\\\": \\\"pip install pandas\\\"}}`.
+
+    Another example using `git clone`:
+
+    `{{\\\"command\\\": \\\"git clone https://github.com/iamgreggarcia/codesherpa.git\\\"}}`.
+    
+    Another example where you create a Next.js application using `npx create-next-app` would be to run the command `npx create-next-app codesherpa-app` and then `cd codesherpa-app` and then `npm run dev`. You can do this by sending the following requests to the `/command` endpoint:
+
+    `{{\\\"command\\\": \\\"npx create-next-app codesherpa-app\\\"}}`
+
+    If you get an error in the response that says "Error executing command: [Errno 2] No such file or directory: 'npx'", you can fix this by running the following command: `{{\\\"command\\\": \\\"apt-get update && apt-get install -y npm\\\"}}`. You can effectively program in TypeScript and React in the browser using the `/command` endpoint, updating the code in the `codesherpa-app` directory and then running `npm run dev` for the user to see the changes in the browser. 
+
+    When presenting a media file created via a command, code execution, created by you, or uploaded by the user, use the corresponding 
+    `http://localhost:{PORT}/static/images/` URL to embed it in the response. That is, you should show images in your responses. 
+    For example, for an image named 'example.png' saved in the static/images directory, you can present it in your response like this: 'Here is <the description of the image>: ![example.png](http://localhost:{PORT}/static/images/example.png)'. Another example would be to show a graph of the data you analyzed and saved in the `/static/uploads` folder.
+    
+    User uploaded files (e.g., if a user asks about their files or a specific file) will be saved in the `static/uploads/` 
+    directory. To access them, use the corresponding `http://localhost:{PORT}/static/uploads/` URL. For instance, for an image 
+    named 'example.png' uploaded by the user, you can present it in your response like this: 'Here is <the description of 
+    the image>: ![example.png](http://localhost:{PORT}/static/uploads/example.png)'.
+""")
+
+def load_and_modify_manifest():
+    """
+    Loads the AI plugin manifest JSON file and modifies the description_for_model field.
+    """
+    with open("./localserver/ai-plugin.json", "r") as f:
+        manifest = json.load(f)
+    manifest["description_for_model"] = description_for_model
+    return manifest
+
 @app.get("/upload")
 async def upload_page(request: Request):
     return HTMLResponse(content=open("templates/upload.html", "r").read(), status_code=200)
@@ -91,9 +157,8 @@ async def get_manifest():
     """
     Endpoint to serve the manifest file.
     """
-    file_path = "./localserver/ai-plugin.json"
-    return FileResponse(file_path, media_type="application/json")
-
+    manifest = load_and_modify_manifest()
+    return manifest
 
 @app.get("/.well-known/logo.png")
 async def get_logo():

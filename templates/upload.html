@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>File Upload</title>
+    <title>codesherpa</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
     <style>
         body {
@@ -12,24 +12,67 @@
             align-items: center;
             height: 100vh;
             font-family: Arial, sans-serif;
+            background-color: #f6f9fc;
         }
 
         form {
             text-align: center;
-            padding: 1em;
+            padding: 2em;
             border: 1px solid #ddd;
             border-radius: 5px;
-            background: #f9f9f9;
+            background: #fff;
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
             width: 100%;
             max-width: 600px;
         }
 
+        button,
+        input[type="submit"] {
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.5em;
+            padding: 0.5em 2em;
+            color: #fff;
+            background-color: #6772e5;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        button:hover,
+        input[type="submit"]:hover {
+            background-color: #7795f8;
+        }
+
+        button:active,
+        input[type="submit"]:active {
+            background-color: #5e6ef1;
+        }
+
+        input[type="submit"]:disabled {
+            background-color: #b8b8b8;
+            cursor: not-allowed;
+        }
+
         #preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #888;
+            font-size: 16px;
+            font-style: italic;
+            cursor: pointer;
             width: 100%;
             height: 200px;
             overflow: auto;
             margin-top: 10px;
             border: 1px solid #ddd;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        #preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         #preview img {
@@ -49,16 +92,25 @@
             margin-top: 20px;
             display: none;
         }
+
+        #file-input {
+            display: none;
+        }
+
+        #codesherpa {
+            background-clip: text;
+            -webkit-text-fill-color: black;
+        }
     </style>
 </head>
 
 <body>
     <form id="upload-form" enctype="multipart/form-data">
-        <h1>File Upload</h1>
+        <h1 id="codesherpa">codesherpa</h1>
         <p>Please select a file to upload (only one file can be uploaded at a time):</p>
         <input type="file" name="file" id="file-input" />
         <br /><br />
-        <div id="preview"></div>
+        <div id="preview" title="Click to choose a file">Click here to choose a file</div>
         <br /><br />
         <div id="message"></div>
         <button id="clear-button"><i class="fas fa-times"></i> Clear</button>
@@ -119,8 +171,10 @@
             }
             if (fileInput.value != "") {
                 uploadButton.disabled = false;
+                uploadButton.style.opacity = "1";
             } else {
                 uploadButton.disabled = true;
+                uploadButton.style.opacity = "0.5";
             }
         });
 
@@ -130,19 +184,24 @@
             uploadButton.disabled = true;
         });
 
+        preview.addEventListener("click", function () {
+            fileInput.click();
+        });
+
         function clearSelection() {
             // Clear input field, preview, and message
             fileInput.value = "";
-            preview.innerHTML = "";
+            preview.textContent = "Click here to choose a file";
             clearButton.style.display = "none";
         }
-        document.getElementById('upload-form').addEventListener('submit', function(e) {
+        document.getElementById('upload-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const fileInput = document.getElementById("file-input");
             const messageDiv = document.getElementById('message');
             const file = fileInput.files[0];
             if (file) {
+                preview.textContent = "";
                 const formData = new FormData();
                 formData.append('file', file);
 
@@ -150,21 +209,21 @@
                     method: 'POST',
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        messageDiv.textContent = `Upload successful! File URL: ${data.url}`;
-                    } else if (data.error) {
-                        messageDiv.textContent = `Upload failed with error: ${data.error}`;
-                    }
-                })
-                .catch(error => {
-                    messageDiv.textContent = `Upload failed with error: ${error.message}`;
-                })
-                .finally(() => {
-                    clearSelection();
-                    uploadButton.disabled = true;
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            messageDiv.textContent = `Upload successful! You can close this tab and return to ChatGPT.`;
+                        } else if (data.error) {
+                            messageDiv.textContent = `Upload failed with error: ${data.error}`;
+                        }
+                    })
+                    .catch(error => {
+                        messageDiv.textContent = `Upload failed with error: ${error.message}`;
+                    })
+                    .finally(() => {
+                        clearSelection();
+                        uploadButton.disabled = true;
+                    });
             }
         });
     </script>
