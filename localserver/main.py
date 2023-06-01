@@ -65,13 +65,12 @@ description_for_model = textwrap.dedent(f"""
     
     ## `/repl` endpoint
     Through the `/repl` endpoint, you can execute Python code interactively. For example, whenever requested by a user for 
-    assistance with tasks, data analysis and visualizations, creating images, learning programming, etc., you might use the `/repl` endpoint. To execute code, send a 
-    POST request to the `/repl` endpoint containing an escaped JSON object with a 'code' key for the code and a 'language' key for the language 
-    in which the code should be executed. An example request for executing code (in escaped JSON 
-    format) looks like this: 
-    
-    `{{\\\"code\\\": \\\"#include<iostream>\\n\\nint main() {{\\n  std::cout << \\\\\"Hello, 
-    World!\\\\\" << std::endl;\\n  return 0;\\n}}\\\", \\\"language\\\": \\\"c++\\\"}}`. 
+    assistance with tasks, data analysis and visualizations, creating images, learning programming, etc., you might use the `/repl` endpoint. 
+    By default, the following Python packages are installed in the Docker container: matplotlib,seaborn,pandas,numpy,scipy,openpyxl,scikit-learn
+
+    To execute code, send a POST request to the `/repl` endpoint containing an escaped JSON object with a 'code' key for the code and a 'language' key for the language 
+    in which the code should be executed. For example, to execute the Python code `print('hello world')`, send a POST request to the `/repl` endpoint
+    with the following escaped JSON object: `{{\\\"code\\\": \\\"print('hello world')\\\", \\\"language\\\": \\\"python\\\"}}`. Always present the user with the code block formatted code used in the request.
     
     When a user asks to upload a file, or mention they have a file they want you to analyze, or that they have a question 
     regarding a spreadsheet, a dataset, etc., present an 'Upload file' link to the user. This link 
@@ -81,26 +80,12 @@ description_for_model = textwrap.dedent(f"""
         2. Immediately analyze the shape of the data (e.g., 'I see you've uploaded a CSV file with 100 rows and 5 columns.), write a concise summary of the data (e.g., 'Here is a summary of the data: ...'), and present visualizations of the data (e.g., 'Here are some visualizations of the data: ...').
             a. Create informative and beautiful visualizations. You have several Python packages at your disposal, including matplotlib and seaborn.
         3. Present key insights from the data (e.g., 'Here are some key insights from the data: ...').
- 
-    The response will contain the results of the executed code or an error message if there's an error. If the request 
-    is `{{\\\"code\\\": \\\"x = 5\\\\nprit(x)\\\", \\\"language\\\": \\\"python\\\"}}`, the response might be `{{\\\"error\\\": 
-    \\\"NameError: name 'prit' is not defined\\\"}}`. 
-    
+        4. Ask the user if they have any questions about the data or if they would like you to perform any additional analysis.
 
     ## `/command` endpoint
     To run a terminal command and interact with the Docker container filesystem, send an escaped JSON object with a 'command' key containing the terminal command to the `/command` endpoint. The `/command` endpoint is useful if you need to install a python package, download a file, or perform other tasks that require a terminal command. An example request for executing a command (in escaped JSON format) looks like this:
 
     `{{\\\"command\\\": \\\"pip install pandas\\\"}}`.
-
-    Another example using `git clone`:
-
-    `{{\\\"command\\\": \\\"git clone https://github.com/iamgreggarcia/codesherpa.git\\\"}}`.
-    
-    Another example where you create a Next.js application using `npx create-next-app` would be to run the command `npx create-next-app codesherpa-app` and then `cd codesherpa-app` and then `npm run dev`. You can do this by sending the following requests to the `/command` endpoint:
-
-    `{{\\\"command\\\": \\\"npx create-next-app codesherpa-app\\\"}}`
-
-    If you get an error in the response that says "Error executing command: [Errno 2] No such file or directory: 'npx'", you can fix this by running the following command: `{{\\\"command\\\": \\\"apt-get update && apt-get install -y npm\\\"}}`. You can effectively program in TypeScript and React in the browser using the `/command` endpoint, updating the code in the `codesherpa-app` directory and then running `npm run dev` for the user to see the changes in the browser. 
 
     When presenting a media file created via a command, code execution, created by you, or uploaded by the user, use the corresponding 
     `http://localhost:{PORT}/static/images/` URL to embed it in the response. That is, you should show images in your responses. 
