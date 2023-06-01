@@ -1,8 +1,14 @@
 # CodeSherpa
 
-CodeSherpa is a code interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container. It primarily emulates a Python REPL. It also executes Rust and C++, but does so in a stateless, non-interactive way.
+CodeSherpa is a code interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container. It primarily emulates a Python REPL. It also executes Rust and C++, but does so in a stateless, non-interactive way. Read the [Quickstart section](#quickstart) to try it out. 
 
-<https://github.com/iamgreggarcia/codesherpa/assets/16596972/a42d717c-a996-4622-a5d1-139466cad233>
+Here's a highlight reel demonstrating what you can do.. See more [examples here](#examples)
+
+
+https://github.com/iamgreggarcia/codesherpa/assets/16596972/b7afb034-6b74-42a3-9496-a912bcaf0f66
+
+
+
 
 ## Recent Updates
 - **May 31, 2023**: Introduced new file upload interface via `upload.html` and corresponding server endpoint, allowing you to upload files at `localhost:3333/upload` or by telling ChatGPT you want to upload a file or have a file you want to work with: ![upload-demo](https://github.com/iamgreggarcia/codesherpa/assets/16596972/bb1bcadf-7152-44fb-becb-f571094cbf56) Refactored Python code execution using `ast` module for enhanced efficiency. Local server and manifest file updates to support these features. Minor updates to REPL execution, error handling, and code formatting.
@@ -157,6 +163,29 @@ For example:
   "command": "echo \"Hello, terminal!\""
 }
 ```
+
+## Examples
+
+Below are some examples. Please note that portions of these videos are edited and/or sped up for brevity.
+
+### Ploting a vector field on a sphere creating an animated gif (short):
+https://github.com/iamgreggarcia/codesherpa/assets/16596972/a42d717c-a996-4622-a5d1-139466cad233
+
+### Demo of the Demo: Recreating the ChatGPT Code Interpreter Video Demo
+Most of us have seen the [ChatGPT Code Interpreter Video Demo](https://openai.com/blog/chatgpt-plugins#code-interpreter), which is the inspiration for this project. So I thought it fitting to ask similar questions as those in the OpenAI video demo.
+
+- Asking about properties of the function `1/sin(x)`:
+
+
+https://github.com/iamgreggarcia/codesherpa/assets/16596972/111e7e25-a5b0-4d7e-9ffb-dee5e844cafd
+
+
+- Uploading a [music.csv](https://corgis-edu.github.io/corgis/csv/music/) dataset for analysis and visualization:
+
+
+
+https://github.com/iamgreggarcia/codesherpa/assets/16596972/5e9a3b6a-b004-434b-aaba-715d7d53e54d
+
 
 ## Contributing
 
