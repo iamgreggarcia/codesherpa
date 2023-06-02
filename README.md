@@ -205,12 +205,7 @@ Steps to contribute:
 5. Submit a Pull Request.
 
 ## Future Work
-
-So I've built CodeSherpa, this Python interpreter-ChatGPT-plugin creature that runs inside Docker like a hamster on a wheel. It's neat, but very much a local(host) affair. Think charming neighborhood coffee shop, not Starbucks.
-
-Scaling this into a full-blown, resource-intensive production version? A tall order. But I'm working on a lightweight version that can ideally be installed by anyone with ChatGPT Plugin access.
-
-It'll swap Docker for an existing compiler API (which can support multiple languages), acting more like a nimble, stateless code sidekick than a full-blown REPL. It'll be a bit more limited, but a start. Again I'm very open to contributions, so if you have an idea, please open an issue or submit a pull request.
+Unsure! I'll keep working on it in my spare time for now. I may try to hack together a much more secure version that can be submitted for review to the plugin store. 
 
 ## License
 
