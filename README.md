@@ -1,6 +1,6 @@
 # CodeSherpa
 
-CodeSherpa is a code interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container. It primarily emulates a Python REPL. It also executes Rust and C++, but does so in a stateless, non-interactive way. Read the [Quickstart section](#quickstart) to try it out.
+CodeSherpa is a code interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container. It primarily emulates a Python REPL. It also executes Rust and C++. Read the [Quickstart section](#quickstart) to try it out.
 
 ## 🚨🤖🛑 Disclaimer 🛑🤖🚨
 
