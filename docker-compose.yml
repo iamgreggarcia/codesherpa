@@ -1,0 +1,10 @@
+services:
+  codesphera:
+    image: ghcr.io/iamgreggarcia/codesherpa:latest
+    build:
+      context: .
+    ports:
+      - "3333:3333"
+    volumes:
+      - ./static:/app/static
+    command: python3 -c "import localserver.main; localserver.main.start()"
