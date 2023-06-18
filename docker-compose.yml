@@ -4,7 +4,7 @@ services:
     build:
       context: .
     ports:
-      - "3000"
+      - "3333:3333"
     volumes:
       - ./static:/app/static
     command: python3 -c "import localserver.main; localserver.main.start()"
