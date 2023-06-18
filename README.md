@@ -28,6 +28,13 @@ Ensure the following software is installed on your system:
 
 - Python 3.10
 - Docker
+- Docker Compose (optional). Download Docker Desktop or the plugin to use Docker Compose
+    - Pluin:
+      - [Linux](https://docs.docker.com/compose/install/#scenario-two-install-the-compose-plugin)
+    - Desktop:
+      - [Linux](https://docs.docker.com/desktop/install/linux-install/)
+      - [Mac](https://docs.docker.com/desktop/install/mac-install/)
+      - [Windows](https://docs.docker.com/desktop/install/windows-install/)
 
 ### Installation and Running CodeSherpa
 
@@ -40,7 +47,7 @@ Here are the steps to get CodeSherpa up and running swiftly:
 docker pull ghcr.io/iamgreggarcia/codesherpa:latest
 
 # Run the Docker image locally
-docker run -p 3333:3333 ghcr.io/iamgreggarcia/codesherpa:latest python3 -c "import localserver.main; localserver.main.start()"
+docker compose up
 ```
 
 **Option 2: Using the repository and Make commands**
@@ -61,7 +68,7 @@ make run-docker-localserver
 
 **Option 3: Using the repository and Docker commands**
 
-Instead of Make commands, you can use the following Docker commands directly:
+Instead of Make commands, you can use the following Docker commands directly or use Docker Compose
 
 ```bash
 # Clone the repository
@@ -75,6 +82,10 @@ docker build -t codesherpa .
 
 # Run the Docker image locally
 docker run -p 3333:3333 codesherpa python3 -c "import localserver.main; localserver.main.start()"
+
+# OR use Docker Compose
+
+docker compose up
 ```
 
 Whichever option you choose, CodeSherpa will be accessible at [localhost:3333](http://localhost:3333).
