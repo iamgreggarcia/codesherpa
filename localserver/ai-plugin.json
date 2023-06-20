@@ -2,14 +2,14 @@
   "schema_version": "v1",
   "name_for_human": "CodeSherpa",
   "name_for_model": "codesherpa",
-  "description_for_human": "Your personal pair programmer.",
+  "description_for_human": "A REPL for your chat.",
   "description_for_model": "",
   "auth": {
     "type": "none"
   },
   "api": {
     "type": "openapi",
-    "url": "http://localhost:3333/.well-known/openapi.yaml",
+    "url": "http://localhost:3333/.well-known/openapi.json",
     "is_user_authenticated": false
   },
   "logo_url": "http://localhost:3333/.well-known/logo.png",

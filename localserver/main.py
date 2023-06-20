@@ -63,6 +63,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/.well-known/logo.png")
+async def get_logo():
+    """
+    Endpoint to serve the logo file.
+    """
+    file_path = "./localserver/logo.png"
+    return FileResponse(file_path, media_type="text/json")
+
+
+@app.get("/.well-known/ai-plugin.json")
+async def get_manifest():
+    """
+    Endpoint to serve the manifest file.
+    """
+    manifest = load_manifest()
+    return manifest
+
+
+@app.get("/.well-known/openapi.json")
+async def get_openapi():
+    """
+    Endpoint to serve the openapi specification file.
+    """
+    return app.openapi()
 
 @app.get("/upload")
 async def upload_page(request: Request):
@@ -71,7 +95,7 @@ async def upload_page(request: Request):
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     """
-    Endpoint to upload a file.
+    Upload a file.
 
     Args:
         file (UploadFile): The uploaded file.
@@ -95,36 +119,10 @@ async def upload_file(file: UploadFile = File(...)):
         return {"error": str(e)}
 
 
-@app.get("/.well-known/ai-plugin.json")
-async def get_manifest():
-    """
-    Endpoint to serve the manifest file.
-    """
-    manifest = load_manifest()
-    return manifest
-
-@app.get("/.well-known/logo.png")
-async def get_logo():
-    """
-    Endpoint to serve the logo file.
-    """
-    file_path = "./localserver/logo.png"
-    return FileResponse(file_path, media_type="text/json")
-
-
-@app.get("/.well-known/openapi.yaml")
-async def get_openapi():
-    """
-    Endpoint to serve the openapi specification file.
-    """
-    file_path = "./localserver/openapi.yaml"
-    return FileResponse(file_path, media_type="text/json")
-
-
 @app.post("/repl")
 def repl(request: CodeExecutionRequest):
     """
-    Endpoint to execute code in a REPL environment.
+    Exexute code. 
     Note: This endpoint current supports a REPL-like environment for Python only.
     
     Args:
@@ -178,7 +176,7 @@ async def execute_command(command: str) -> str:
 @app.post("/command")
 async def command_endpoint(command_request: CommandExecutionRequest):
     """
-    Endpoint to execute a shell command.
+    Run commands.
 
     Args:
         command_request (CommandExecutionRequest): The request object containing the command to execute.
@@ -211,7 +209,7 @@ def start():
 
 def dev():
     """
-    Starts the FastAPI server.
+    Starts the FastAPI dev server.
     """
 
     def shutdown():
