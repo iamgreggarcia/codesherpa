@@ -31,7 +31,12 @@ logger.configure(
     ]
 )
 
-app = FastAPI()
+app = FastAPI(
+  title="codesherpa",
+  version="1.0.0",
+  description=
+  "A REPL for your chat. Write and execute code, upload files for data analysis, and more.",
+)
 
 executors = {
     "python": PythonExecutor(),
@@ -250,3 +255,16 @@ def start():
     signal.signal(signal.SIGINT, lambda signum, frame: shutdown())
 
     uvicorn.run("localserver.main:app", host="0.0.0.0", port=PORT, reload=False)
+
+def dev():
+    """
+    Starts the FastAPI server.
+    """
+
+    def shutdown():
+        logger.info("Shutting down server...")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, lambda signum, frame: shutdown())
+
+    uvicorn.run("localserver.main:app", host="0.0.0.0", port=PORT, reload=True)

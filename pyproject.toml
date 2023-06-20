@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "codesherpa"
 version = "0.1.0"
-description = "CodeSherpa is a code-interpreter ChatGPT plugin. It allows ChatGPT to execute code and run commands within a Docker container."
+description = "Codesherpa is a code-interpreter API that allows you to run code in a Docker container."
 authors = ["Greg Garcia <greg@garcia.casa>"]
 license = "MIT"
 readme = "README.md"
@@ -46,7 +46,8 @@ requests = "^2.30.0"
 testpaths = ["tests"]
 
 [tool.poetry.scripts]
-dev = "localserver.main:start"
+start = "localserver.main:start"
+dev = "localserver.main:dev"
 
 [build-system]
 requires = ["poetry-core"]
