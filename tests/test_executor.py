@@ -1,3 +1,4 @@
+import os
 import pytest
 import subprocess
 from executors.executor import PythonExecutor, CppExecutor, RustExecutor
@@ -58,3 +59,10 @@ def test_rust_executor():
     """
     with pytest.raises(subprocess.CalledProcessError):
         result = executor.execute(code)
+
+def test_tear_down():
+    print("Tearing down...")
+    file_names = ["script.cpp", "script.rs", "script", "a.out"]
+    for file_name in file_names:
+        file_path = os.path.join(os.getcwd(), file_name)
+        os.remove(file_path)
