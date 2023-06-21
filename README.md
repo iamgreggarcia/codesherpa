@@ -1,6 +1,6 @@
 # CodeSherpa
 
-CodeSherpa is a code interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container. It primarily emulates a Python REPL. It also executes Rust and C++. Read the [Quickstart section](#quickstart) to try it out.
+CodeSherpa is a code interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container. Read the [Quickstart section](#quickstart) to try it out.
 
 ### Disclaimer
 
@@ -16,6 +16,10 @@ https://github.com/iamgreggarcia/codesherpa/assets/16596972/b7afb034-6b74-42a3-9
 
 
 ## Recent Updates
+- **June 21, 2023**: 
+    - The ChatGPT plugin servic will now fetch the `openapi.json` generated be the server. Also added [request example data](https://fastapi.tiangolo.com/tutorial/schema-extra-example/) which is included in the api spec. This reduces the size of the plugin manifest `description_for_model`.
+    - Updated the README section on future work. 
+- **June 18, 2023**: Added `docker-compose.yml`
 - **May 31, 2023**: Introduced new file upload interface via `upload.html` and corresponding server endpoint, allowing you to upload files at `localhost:3333/upload` or by telling ChatGPT you want to upload a file or have a file you want to work with: ![upload-demo](https://github.com/iamgreggarcia/codesherpa/assets/16596972/bb1bcadf-7152-44fb-becb-f571094cbf56) Refactored Python code execution using `ast` module for enhanced efficiency. Local server and manifest file updates to support these features. Minor updates to REPL execution, error handling, and code formatting.
 - **May 22, 2023**: Refactored README to provide clear and concise instructions for building and running CodeSherpa.
 - **May 20, 2023**: CodeSherpa now supports multiple programming languages, including Python, C++, and Rust.
@@ -96,89 +100,6 @@ Whichever option you choose, CodeSherpa will be accessible at [localhost:3333](h
 2. Select "Develop your own plugin".
 3. In the plugin URL input, enter `localhost:3333`. Your ChatGPT should now be able to use CodeSherpa's features.
 
-For more detailed information on API endpoints, usage, contributing, future work, and license, refer to the respective sections below.
-
-## API Endpoints
-
-### POST `/repl`
-
-Executes the provided code is the specified language, maintaining the state between requests, and returns the output or error message.
-
-#### Request Body
-
-| Parameter | Type   | Description                                                      |
-|-----------|--------|------------------------------------------------------------------|
-| code      | string | The code to be executed.            |
-| language  | string | The programming language of the code to be executed.             |
-
-#### Supported Languages
-
-| Language | Language Parameter |
-|----------|--------------------|
-| Python   | python             |
-| C++      | c++                |
-| Rust     | rust               |
-
-#### Response
-
-**HTTP 200**
-
-| Parameter | Type   | Description                           |
-|-----------|--------|---------------------------------------|
-| result    | string | The output of the executed code.      |
-
-**HTTP 400**
-
-| Parameter  | Type    | Description                           |
-|------------|---------|---------------------------------------|
-| error      | string  | A brief description of the error.     |
-| returnCode | integer | The return code of the failed process.|
-| command    | string  | The command that was attempted.       |
-| output     | string  | Any output that resulted from the attempted command. |
-
-### POST `/command`
-
-Runs the provided terminal command and returns the output or error message.
-
-#### Request Body
-
-| Parameter | Type   | Description                      |
-|-----------|--------|----------------------------------|
-| command   | string | The terminal command to execute. |
-
-#### Response
-
-| Parameter | Type   | Description                           |
-|-----------|--------|---------------------------------------|
-| result    | string | The output of the executed command.   |
-| error     | string | Error message if there is an error.   |
-
-## Usage
-
-To interact with the CodeSherpa API, use HTTP requests to the corresponding endpoints. To execute some code code, send a POST request to the `/repl` endpoint with a JSON object containing the `code` key and the `language` key.
-
-For example, here's a request to plot a vector field on a sphere using Python:
-
-```json
-{
-  "code": "import numpy as np\nimport matplotlib.pyplot as plt\nfrom mpl_toolkits.mplot3d import Axes3D\n\n# Define the number of vectors along each dimension\nn_vectors = 20\n\n# Define the sphere\nphi = np.linspace(0, np.pi, n_vectors)\ntheta = np.linspace(0, 2 * np.pi, n_vectors)\nphi, theta = np.meshgrid(phi, theta)\nx = np.sin(phi) * np.cos(theta)\ny = np.sin(phi) * np.sin(theta)\nz = np.cos(phi)\n\n# Define the vector field\nvx = np.sin(phi) * np.cos(theta)\nvy = np.sin(phi) * np.sin(theta)\nvz = np.cos(phi)\n\n# Create the figure\nfig = plt.figure(figsize=(8, 8))\nax = fig.add_subplot(111, projection='3d')\n\n# Plot the sphere surface\nax.plot_surface(x, y, z, color='b', alpha=0.3)\n\n# Plot the vector field\nax.quiver(x, y, z, vx, vy, vz, length=0.1, normalize=True)\n\n# Set the aspect ratio\nax.set_box_aspect([1, 1, 1])\n\nplt.savefig('static/images/vector_field.png')",
-  "language": "python"
-}
-```
-
-And here's ChatGPT send the request to CodeSherpa:
-
-<https://github.com/iamgreggarcia/codesherpa/assets/16596972/1ae9cbda-1f83-4986-9b2f-ea4e2f1d76f1>
-
-To run terminal commands, send a POST request to the `/command` endpoint with a JSON object containing the `command` key and the terminal command to execute.
-
-For example:
-
-```json
-{
-  "command": "echo \"Hello, terminal!\""
-}
-```
 
 ## Examples
 
@@ -203,6 +124,24 @@ https://github.com/iamgreggarcia/codesherpa/assets/16596972/111e7e25-a5b0-4d7e-9
 https://github.com/iamgreggarcia/codesherpa/assets/16596972/5e9a3b6a-b004-434b-aaba-715d7d53e54d
 
 
+## Future Work
+
+### Standalone Code Interpreter
+The new [`functions`](https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions) parameter in the latest GPT models (`gpt-4-0613`, `gpt-3.5-turbo-16k-0613`, and `gpt-4-32k-0613` which I don't have access to 🙄) effectively unlocks the capability to build your own "plugin service", similar to ChatGPT Plugins.
+
+As such, I want to make a standalone version of **codesherpa** that doesn't require plugin developer access, loggin into ChatGPT, etc., only an API. 
+
+I've already translated the `openapi.json` spec into a `functions` parameter for the relevant endpoints using a simple tool called **[Func-it](https://github.com/iamgreggarcia/funcit)**
+
+
+ It transforms your openapi spec into a drop-in ready functions parameter in a programming language of your choice. I suspect OpenAI does something similar during the plugin registration flow, converting openapi specs into functions that the model can call. 
+
+Next steps:
+1. Create the frontend, which I'll most likely do using Vercel's AI sdk or their chat template
+2. Configure an agent, using [this notebook](https://github.com/openai/openai-cookbook/blob/0d1436b8d9b858c220d708a446a09eef54be61b0/examples/How_to_call_functions_for_knowledge_retrieval.ipynb) in the OpenAI Cookbook
+
+Stay tuned!
+
 ## Contributing
 
 I welcome contributions! If you have an idea for a feature, or want to report a bug, please open an issue, or submit a pull request.
@@ -214,9 +153,6 @@ Steps to contribute:
 3. Commit your changes `git commit -m 'Add YourAmazingIdea'`.
 4. Push to the branch `git push origin feature/YourAmazingIdea`.
 5. Submit a Pull Request.
-
-## Future Work
-Unsure! I'll keep working on it in my spare time for now. I may try to hack together a much more secure version that can be submitted for review to the plugin store. 
 
 ## License
 

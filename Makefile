@@ -19,3 +19,9 @@ test:
 
 run-frontend:
 	cd frontend && npm run dev
+
+dev:
+	poetry run dev
+
+start:
+	poetry run start
