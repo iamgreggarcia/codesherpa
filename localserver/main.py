@@ -39,6 +39,17 @@ app = FastAPI(
   "A REPL for your chat. Write and execute code, upload files for data analysis, and more.",
 )
 
+@app.on_event("startup")
+def startup_event():
+    openapi_schema = app.openapi()
+    openapi_schema["servers"] = [
+        {
+            "url": "http://localhost:3333",
+            "description": "Local server",
+        }
+    ]
+    app.openapi_schema = openapi_schema
+
 executors = {
     "python": PythonExecutor(),
     "c++": CppExecutor(),
