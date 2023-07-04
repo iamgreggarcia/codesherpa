@@ -15,17 +15,6 @@ RUN apt-get update && apt-get install -y \
 # Create a symbolic link for Python
 RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
-# Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Install Node.js and NPM
-RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
-RUN apt-get install -y nodejs
-
-# Install create-next-app
-RUN npm install -g create-next-app
-
 # Set up working directory
 WORKDIR /app
 
