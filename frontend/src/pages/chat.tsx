@@ -10,18 +10,16 @@ import { toast } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([{ role: 'system', content: SYSTEM_PROMPT }]);
+  const [messages, setMessages] = useState<Message[]>([{ role: 'system', content: SYSTEM_PROMPT ?? '' }]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [messageIsStreaming, setMessageIsStreaming] = useState(false);
   const [selectedModel, setSelectedModel] = useState(Model.GPT3_5_CODE_INTERPRETER_16K);
-  const [functionCallArgs, setFunctionCallArgs] = useState<string>('');
   const [conversationStarted, setConversationStarted] = useState(false);
   const [functionCall, setFunctionCall] = useState(null);
   const [isFunctionCall, setIsFunctionCall] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const cancelStreamRef: MutableRefObject<boolean> = useRef(false);
-  const accumulatedChunksRef: MutableRefObject<string> = useRef('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
 
   const isMobile = () => {
@@ -47,10 +45,22 @@ export default function Chat() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log('OK')
-        toast.success('File uploaded successfully');
+        toast.success(`${file.name} uploaded successfully`, {
+          position: "top-center",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          });
+        
+
         // Save the URL
         setUploadedFileUrl(data.url);
+        console.log('data.url: ', data.url)
+        handleSendMessage(null, `File uploaded successfully: **[${file.name}](${data.url})**`);
         console.log('data.url: ', data.url)
       } else {
         toast.error(`Upload failed: ${data.message}`);
@@ -97,7 +107,7 @@ export default function Chat() {
         if (isFunction) {
           if (first) {
             first = false;
-            const assistantMessage: Message = { role: 'assistant', name: 'function_call', content: decodedValue };
+            const assistantMessage: Message = { role: 'assistant', name: 'function_call', content: decodedValue ?? '' };
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
 
           } else {
@@ -111,7 +121,7 @@ export default function Chat() {
         } else {
           if (first) {
             first = false;
-            const assistantMessage: Message = { role: 'assistant', content: decodedValue };
+            const assistantMessage: Message = { role: 'assistant', content: decodedValue ?? '' };
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
 
           } else {
@@ -130,11 +140,11 @@ export default function Chat() {
   };
 
   const handleSendMessage = useCallback(
-    async (event: React.FormEvent) => {
-      event.preventDefault();
+    async (event: React.FormEvent | null, content: string = newMessage) => {
+      event?.preventDefault();
       setMessageIsStreaming(true);
       setConversationStarted(true);
-      const newUserMessage: Message = { role: 'user', content: newMessage };
+      const newUserMessage: Message = { role: 'user', content: content ?? '' };
       setNewMessage('');
       setMessages(prevMessages => [...prevMessages, newUserMessage]);
 
@@ -170,7 +180,7 @@ export default function Chat() {
 
           const parsedFunctionCallResponse = await pluginResponse.json();
           const stringifiedparsedFunctionCallResponse = JSON.stringify(parsedFunctionCallResponse);
-          const pluginResponseMessage: Message = { role: 'assistant', name: 'function_call', content: stringifiedparsedFunctionCallResponse };
+          const pluginResponseMessage: Message = { role: 'assistant', name: 'function_call', content: stringifiedparsedFunctionCallResponse ?? '' };
           setMessages(prevMessages => [...prevMessages, pluginResponseMessage]);
 
           console.log('latest message: ', messages[messages.length]);
@@ -179,7 +189,7 @@ export default function Chat() {
           // console.log('response: ', pluginResponse);
           // console.log('response.result: ', parsedFunctionCallResponse.result)
 
-          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result };
+          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? '' };
           setMessages(prevMessages => [...prevMessages, functionCallMessage]);
           let secondAssistantMessageContent = await fetchChat([...messages, functionCallMessage], abortController);
           console.log('secondAssistantMessageContent INNER TRY: ', secondAssistantMessageContent);
@@ -277,7 +287,7 @@ export default function Chat() {
                 </button>
                 <textarea
                   ref={textareaRef}
-                  className="outline-none my-0 mr-2 ml-2 w-full resize-none bg-slate-200 rounded-md p-0 py-2 pr-12 pl-10 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-10 placeholder:text-gray-400 dark:placeholder:text-gray-300 min-h-14"
+                  className="dark:outline-none my-0 mr-2 ml-2 w-full resize-none bg-slate-200 rounded-md p-0 py-2 pr-12 pl-10 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-10 placeholder:text-gray-400 dark:placeholder:text-gray-300 min-h-14"
                   style={{
                     resize: 'none',
                     bottom: `${textareaRef?.current?.scrollHeight}px`,

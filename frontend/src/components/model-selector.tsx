@@ -88,10 +88,10 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, setSelecte
                           baseModel === OpenAIBaseModel.GPT4 ? (selectedModel.startsWith(OpenAIBaseModel.GPT4) ? selectedModelSVG : baseModelToSVG[baseModel]) : baseModelToSVG[baseModel]
                       }
                     </span>
-                    <span className="truncate text-sm font-medium md:pr-1.5 pr-1.5 pl-0">{baseModel}</span>
+                    <span className="truncate text-sm font-semibold md:pr-1.5 pr-1.5 pl-0">{baseModel}</span>
                   </button>
                   {isOpen && activeButton === baseModel && (
-                    <ul className="dropdown-content mt-0 left-0 z-[1] menu p-2 shadow bg-white dark:bg-gray-900 rounded-box w-full">                      {Object.values(Model).filter((model) => model.startsWith(activeButton)).map((model) => (
+                    <ul className="dropdown-content mt-0 left-0 z-[1] menu p-2 shadow bg-gray-100 dark:bg-gray-900 rounded-box w-full">                      {Object.values(Model).filter((model) => model.startsWith(activeButton)).map((model) => (
                       <li key={model} className={classNames(" flex items-start border-b border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700", model === selectedModel ? "bg-base-100 dark:bg-gray-900" : "")}
                         onClick={(e) => {
                           e.preventDefault();

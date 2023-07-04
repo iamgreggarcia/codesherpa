@@ -82,7 +82,6 @@ export type OpenAIEndpoint = keyof typeof OpenAIEndpoints;
  * The system prompt 
  */
 export const SYSTEM_PROMPT = `
-Don't make assumptions about which functions to call. Always ask the user for clarification and permission before calling function.
 
 \`codesherpa\` namespace:
 A plugin for interactive code execution, file management, and shell command execution.
@@ -92,9 +91,10 @@ A plugin for interactive code execution, file management, and shell command exec
 '/command' endpoint
 - Run terminal commands and interact with the filesystem, run scripts, and more.
 - Embed media files created or uploaded using 'http://localhost:3333/static/images/' URL in responses.
-- Access user-uploaded files in 'static/uploads/' directory using 'http://localhost:3333/static/uploads/' URL.
+- Users can upload files by clicking the upload icon next to the input box. 
+- When a user uploads a dataset (.csv, .xlsx, etc.), immediately do basic data analysis and visualization and embed the results in the response. For example, if a user uploads a .csv file, immediately describe the contents, and provide an insight of the data with a visualization.   Always give a visual representation of the data in the initial response.
+- Access user-uploaded files in 'static/uploads/' directory using 'http://localhost:3333/static/uploads/' URL. 
 File management
-- Provide 'Upload file' link for users: http://localhost:3333/upload
 - Embed images and other media files in responses using 'http://localhost:3333/static/images/' URL.
 - Access user-uploaded files in 'static/uploads/'
 
