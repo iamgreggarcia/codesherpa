@@ -1,8 +1,6 @@
 {
-  "name": "vercel-blob",
-  "repository": "https://github.com/vercel/examples.git",
-  "license": "MIT",
-  "version": "0.0.0",
+  "name": "codesherpa-fe",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,24 +9,32 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@types/node": "18.15.11",
-    "@types/react": "18.0.37",
-    "@types/react-dom": "18.0.11",
-    "@vercel/blob": "^0.6.3",
+    "@headlessui/react": "^1.7.15",
+    "@headlessui/tailwindcss": "^0.1.3",
+    "@heroicons/react": "^2.0.18",
+    "@types/node": "20.3.1",
+    "@types/react": "18.2.14",
+    "@types/react-dom": "18.2.6",
     "autoprefixer": "10.4.14",
-    "eslint": "8.38.0",
-    "eslint-config-next": "13.3.0",
-    "nanoid": "^4.0.2",
-    "next": "13.4.0",
-    "postcss": "8.4.22",
+    "eslint": "8.43.0",
+    "eslint-config-next": "13.4.7",
+    "eventsource-parser": "^1.0.0",
+    "next": "13.4.8-canary.2",
+    "node-fetch": "^3.3.1",
+    "parse-json": "^7.0.0",
+    "postcss": "8.4.24",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-hot-toast": "^2.4.0",
-    "tailwindcss": "3.3.1",
-    "typescript": "5.0.4"
+    "react-markdown": "^8.0.7",
+    "react-syntax-highlighter": "^15.5.0",
+    "react-textarea-autosize": "^8.5.0",
+    "react-toastify": "^9.1.3",
+    "tailwindcss": "3.3.2",
+    "typescript": "5.1.3"
   },
   "devDependencies": {
-    "@types/ms": "^0.7.31",
-    "turbo": "^1.9.3"
+    "@types/parse-json": "^4.0.0",
+    "@types/react-syntax-highlighter": "^15.5.7",
+    "daisyui": "^3.1.7"
   }
 }

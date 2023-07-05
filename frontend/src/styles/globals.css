@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 52, 53, 64;
+  --background-end-rgb: 52, 53, 64;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 52, 53, 64;
+    --background-end-rgb: 52, 53, 64;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background-start-rgb: 241, 245, 249;
+    --background-end-rgb: 241, 245, 249;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb()
+}
+
+html {
+  background: rgb(var(--background-start-rgb));
+}
+
+@media (max-width: 720px) {
+  pre {
+    width: calc(100vw - 110px);
+  }
+}
+
+pre:has(div.codeblock) {
+  padding: 0;
+}
+
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loader {
+  border-top-color: #3498db;
+  animation: spin 1s linear infinite;
+}
+
+textarea:focus {
+  border-color: #3498db;
+}
+
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 225, 225, 0.4);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: rgba(181, 179, 179, 0.9);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap');
+
+.neon-text {
+  font-family: 'Roboto', sans-serif;
+  font-size: 2.5em;
+  color: #09ff00;
+  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff, 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff;
+  animation: flicker 1.5s infinite;
+}
+
+@keyframes flicker {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

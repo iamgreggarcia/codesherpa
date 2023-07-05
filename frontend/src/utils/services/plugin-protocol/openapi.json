@@ -1,0 +1,339 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "codesherpa",
+        "description": "A REPL for your chat. Write and execute code, upload files for data analysis, and more.",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/.well-known/logo.png": {
+            "get": {
+                "summary": "Get Logo",
+                "description": "Endpoint to serve the logo file.",
+                "operationId": "get_logo__well_known_logo_png_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/.well-known/ai-plugin.json": {
+            "get": {
+                "summary": "Get Manifest",
+                "description": "Endpoint to serve the manifest file.",
+                "operationId": "get_manifest__well_known_ai_plugin_json_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/.well-known/openapi.json": {
+            "get": {
+                "summary": "Get Openapi",
+                "description": "Endpoint to serve the openapi specification file.",
+                "operationId": "get_openapi__well_known_openapi_json_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/upload": {
+            "get": {
+                "summary": "Upload Page",
+                "operationId": "upload_page_upload_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Upload File",
+                "description": "Upload a file.\n\nArgs:\n    file (UploadFile): The uploaded file.\n\nReturns:\n    dict: The result of the file upload process.",
+                "operationId": "upload_file_upload_post",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_upload_file_upload_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/repl": {
+            "post": {
+                "summary": "Repl",
+                "description": "Exexute code. \nNote: This endpoint current supports a REPL-like environment for Python only.\n\nArgs:\n    request (CodeExecutionRequest): The request object containing the code to execute.\n\nReturns:\n    CodeExecutionResponse: The result of the code execution.",
+                "operationId": "repl_repl_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CodeExecutionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CodeExecutionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/command": {
+            "post": {
+                "summary": "Command Endpoint",
+                "description": "Run commands.\n\nArgs:\n    command_request (CommandExecutionRequest): The request object containing the command to execute.\n\nReturns:\n    CommandExecutionResponse: The result of the command execution.",
+                "operationId": "command_endpoint_command_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommandExecutionRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommandExecutionResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Body_upload_file_upload_post": {
+                "title": "Body_upload_file_upload_post",
+                "required": [
+                    "file"
+                ],
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "title": "File",
+                        "type": "string",
+                        "format": "binary"
+                    }
+                }
+            },
+            "CodeExecutionRequest": {
+                "title": "CodeExecutionRequest",
+                "required": [
+                    "language",
+                    "code"
+                ],
+                "type": "object",
+                "properties": {
+                    "language": {
+                        "title": "Language",
+                        "type": "string",
+                        "example": "python"
+                    },
+                    "code": {
+                        "title": "Code",
+                        "type": "string",
+                        "example": "print('Hello, World!')"
+                    }
+                },
+                "description": "A Pydantic model representing a request to execute code.\n\nAttributes:\n    language (str): The programming language of the code to be executed.\n    code (str): The code to be executed.",
+                "example": {
+                    "language": "python",
+                    "code": "print('Hello, World!')"
+                }
+            },
+            "CodeExecutionResponse": {
+                "title": "CodeExecutionResponse",
+                "required": [
+                    "result"
+                ],
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "title": "Result",
+                        "type": "string",
+                        "example": "Hello, World!"
+                    }
+                },
+                "description": "A Pydantic model representing the response from a code execution request.\n\nAttributes:\n    result (str): The result of the code execution.",
+                "example": {
+                    "result": "Hello, World!"
+                }
+            },
+            "CommandExecutionRequest": {
+                "title": "CommandExecutionRequest",
+                "required": [
+                    "command"
+                ],
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "title": "Command",
+                        "type": "string",
+                        "example": "ls -la"
+                    }
+                },
+                "description": "A Pydantic model representing a request to execute a command.\n\nAttributes:\n    command (str): The command to be executed.",
+                "example": {
+                    "command": "ls -la"
+                }
+            },
+            "CommandExecutionResponse": {
+                "title": "CommandExecutionResponse",
+                "required": [
+                    "result"
+                ],
+                "type": "object",
+                "properties": {
+                    "result": {
+                        "title": "Result",
+                        "type": "string",
+                        "example": "Hello, World!"
+                    }
+                },
+                "description": "A Pydantic model representing the response from a command execution request.\n\nAttributes:\n    result (str): The result of the command execution.",
+                "example": {
+                    "result": "Hello, World!"
+                }
+            },
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        }
+                    }
+                }
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        }
+                    },
+                    "msg": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "type": {
+                        "title": "Error Type",
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3333",
+            "description": "Local server"
+        }
+    ]
+}
