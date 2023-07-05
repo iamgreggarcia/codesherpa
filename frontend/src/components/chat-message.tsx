@@ -128,7 +128,7 @@ const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, streamingMe
     
     <div
       className={`group md:px-4 ${message.role === 'user'
-        ? 'border-b border-black/10 bg-transparent text-#1f232a dark:border-gray-900/50 dark:bg-[#1f232a] dark:text-white'
+        ? 'border-b border-black/10 bg-transparent text-#1e232a dark:border-gray-900/50 dark:bg-[#1e232a] dark:text-white'
           : 'border-0 border-black/10 bg-slate-100 dark:border-gray-900/50 dark:bg-gray-700 dark:text-white'
         }`}
       style={{ overflowWrap: 'anywhere' }}

@@ -1,6 +1,6 @@
 services:
   codesphera:
-    image: codesphera
+    image: ghcr.io/iamgreggarcia/codesphera
     build:
       context: .
     ports:

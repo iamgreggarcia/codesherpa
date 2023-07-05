@@ -60,6 +60,7 @@ PORT = 3333
 
 origins = [
     f"http://localhost:{PORT}",
+    "http://localhost:3002",
     "http://localhost:3001",
     "http://localhost:3000",
     "https://chat.openai.com",

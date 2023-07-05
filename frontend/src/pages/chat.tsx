@@ -54,8 +54,8 @@ export default function Chat() {
           draggable: true,
           progress: undefined,
           theme: "colored",
-          });
-        
+        });
+
 
         // Save the URL
         setUploadedFileUrl(data.url);
@@ -79,7 +79,7 @@ export default function Chat() {
     });
     const reader = response.body?.getReader();
     const decoder = new TextDecoder('utf-8');
-    let assistantMessageContent = '';
+    let buffer = '';
     let isFunction = false;
     let first = true;
     let done = false;
@@ -97,38 +97,39 @@ export default function Chat() {
           break;
         }
         let decodedValue = decoder.decode(value);
-        if (decodedValue.includes('{"function_call":')) {
-          console.log('FUNCTION CALL')
+        buffer += decodedValue;
+
+        const functionCallStart = buffer.indexOf('{"function_call":');
+        const functionCallEnd = buffer.indexOf('}', functionCallStart);
+        if (functionCallStart !== -1 && functionCallEnd !== -1) {
           isFunction = true;
           setIsFunctionCall(true);
-        }
-        assistantMessageContent += decodedValue;
+          const functionCall = buffer.substring(functionCallStart, functionCallEnd + 1);
+          buffer = buffer.substring(functionCallEnd + 1);
+          decodedValue = functionCall;
 
-        if (isFunction) {
           if (first) {
             first = false;
             const assistantMessage: Message = { role: 'assistant', name: 'function_call', content: decodedValue ?? '' };
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
-
           } else {
             setMessages(prevMessages => {
               const updatedMessages = [...prevMessages];
               const lastMessage = updatedMessages[updatedMessages.length - 1];
-              lastMessage.content = assistantMessageContent;
+              lastMessage.content = decodedValue;
               return updatedMessages;
             });
           }
-        } else {
+        } else if (!isFunction) {
           if (first) {
             first = false;
             const assistantMessage: Message = { role: 'assistant', content: decodedValue ?? '' };
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
-
           } else {
             setMessages(prevMessages => {
               const updatedMessages = [...prevMessages];
               const lastMessage = updatedMessages[updatedMessages.length - 1];
-              lastMessage.content = assistantMessageContent;
+              lastMessage.content += decodedValue;
               return updatedMessages;
             });
           }
@@ -136,7 +137,7 @@ export default function Chat() {
       }
     }
 
-    return assistantMessageContent;
+    return buffer;
   };
 
   const handleSendMessage = useCallback(
