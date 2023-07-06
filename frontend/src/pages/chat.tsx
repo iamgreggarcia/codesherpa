@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, MutableRefObject, useCallback } from 'react';
-import { Model, pathMap, SYSTEM_PROMPT, SYSTEM_PROMPT_CODE_INTERPRETER } from '@/constants/openai';
+import { Model, pathMap, serverUrl, SYSTEM_PROMPT, SYSTEM_PROMPT_CODE_INTERPRETER } from '@/constants/openai';
+import { operations } from '@/utils/services/plugin-protocol/codesherpa';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import ModelSelector from '@/components/model-selector';
 import ChatMessage from '@/components/chat-message';
@@ -10,7 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function Chat() {
   const [selectedModel, setSelectedModel] = useState(Model.GPT3_5_CODE_INTERPRETER_16K);
-  const [messages, setMessages] = useState<Message[]>([{ role: 'system', content: selectedModel === Model.GPT3_5_CODE_INTERPRETER_16K || Model.GPT4_CODE_INTERPRETER ? SYSTEM_PROMPT_CODE_INTERPRETER : SYSTEM_PROMPT}]);
+  const [messages, setMessages] = useState<Message[]>([{ role: 'system', content: selectedModel === Model.GPT3_5_CODE_INTERPRETER_16K || Model.GPT4_CODE_INTERPRETER ? SYSTEM_PROMPT_CODE_INTERPRETER : SYSTEM_PROMPT }]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [messageIsStreaming, setMessageIsStreaming] = useState(false);
@@ -47,7 +48,7 @@ export default function Chat() {
 
       if (response.ok) {
         console.log('OK')
-        toast.success('File uploaded successfully');
+        // toast.success('File uploaded successfully');
         // Save the URL
         setUploadedFileUrl(data.url);
         console.log('data.url: ', data.url)
@@ -132,7 +133,7 @@ export default function Chat() {
       event.preventDefault();
       setMessageIsStreaming(true);
       setConversationStarted(true);
-      const newUserMessage: Message = { role: 'user', content: newMessage ?? ''};
+      const newUserMessage: Message = { role: 'user', content: newMessage ?? '' };
       setNewMessage('');
       setMessages(prevMessages => [...prevMessages, newUserMessage]);
 
@@ -142,25 +143,21 @@ export default function Chat() {
         console.log('assistantMessageContent FIRST: ', assistantMessageContent);
         try {
           const parsed = JSON.parse(assistantMessageContent);
-          alert('function') 
           let functionName = parsed.function_call.name;
           let functionArgumentsStr = parsed.function_call.arguments;
 
           // Descape and parse the arguments
-          let descapeArgumentsStr = descapeJsonString(functionArgumentsStr);
+          // let descapeArgumentsStr = descapeJsonString(functionArgumentsStr);
           // let functionArguments = JSON.parse(descapeArgumentsStr);
           setFunctionCall(parsed.function_call);
           console.log('function name: ', functionName);
           const requestBody = functionArgumentsStr;
-          // Determine the endpoint based on the functionName
-          let endpoint = '';
-          if (functionName === 'repl_repl_post') {
-            endpoint = '/repl';
-          } else if (functionName === 'command_endpoint_command_post') {
-            endpoint = '/command';
+          let endpoint = pathMap[functionName as keyof operations];
+          if (!endpoint) {
+            throw new Error('Endpoint is undefined');
           }
-
-          const pluginResponse = await fetch(`http://localhost:3333${endpoint}`, {
+          console.log('endpoint: ', endpoint)
+          const pluginResponse = await fetch(`${serverUrl}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: requestBody
@@ -174,7 +171,7 @@ export default function Chat() {
           console.log('latest message: ', messages[messages.length]);
 
 
-          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? ''};
+          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? '' };
           setMessages(prevMessages => [...prevMessages, functionCallMessage]);
           let secondAssistantMessageContent = await fetchChat([...messages, functionCallMessage], abortController);
           console.log('secondAssistantMessageContent INNER TRY: ', secondAssistantMessageContent);
@@ -327,7 +324,7 @@ export default function Chat() {
               target="_blank"
               rel="noreferrer"
               className="underline"
-            > 
+            >
             </a>
               {' '}
 

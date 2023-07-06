@@ -32,6 +32,22 @@ const createOperationIdToPathMap = (apiDocument: OpenAPIV3.Document): PathMap =>
  * The mapping of operation IDs to their corresponding paths.
  */
 export const pathMap = createOperationIdToPathMap(openapi as OpenAPIV3.Document);
+
+
+/**
+ * Returns the server URL from an OpenAPI document.
+ * @param apiDocument The OpenAPI document to retrieve the server URL from.
+ * @returns The server URL, or undefined if not found.
+ */
+const getServerUrl = (apiDocument: OpenAPIV3.Document): string | undefined => {
+  return apiDocument.servers && apiDocument.servers.length > 0 ? apiDocument.servers[0].url : undefined;
+};
+
+/**
+ * The server URL for the OpenAPI specification.
+ */
+export const serverUrl: string | undefined = getServerUrl(openapi as OpenAPIV3.Document); 
+
 /**
  * Enum representing the different base GPT models available.
  */
@@ -119,6 +135,7 @@ export type OpenAIEndpoint = keyof typeof OpenAIEndpoints;
  * The system prompt for codesherpa.
  */
 export const SYSTEM_PROMPT_CODE_INTERPRETER = `
+Do not make assumptions about which functions to run or which values to use. Always verify with the user.
 Only use the functions you have been provided with.
 
 \`codesherpa\` namespace:
