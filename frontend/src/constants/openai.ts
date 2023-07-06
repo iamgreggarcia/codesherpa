@@ -1,5 +1,37 @@
-import { Mode } from "fs";
+import { OpenAPIV3 } from 'openapi-types';
+import openapi from '@/utils/services/plugin-protocol/openapi.json';
 
+/**
+ * Interface representing a mapping of operation IDs to their corresponding paths.
+ */
+interface PathMap {
+  [key: string]: string;
+}
+
+/**
+ * Creates a mapping of operation IDs to their corresponding paths from an OpenAPI document.
+ * @param apiDocument The OpenAPI document to create the mapping from.
+ * @returns The mapping of operation IDs to their corresponding paths.
+ */
+const createOperationIdToPathMap = (apiDocument: OpenAPIV3.Document): PathMap => {
+  const pathMap: PathMap = {};
+
+  for (const path in apiDocument.paths) {
+    for (const method in apiDocument.paths[path]) {
+      const operation = apiDocument.paths[path]?.[method as OpenAPIV3.HttpMethods];
+      if (operation && operation.operationId) {
+        pathMap[operation.operationId] = path;
+      }
+    }
+  }
+
+  return pathMap;
+};
+
+/**
+ * The mapping of operation IDs to their corresponding paths.
+ */
+export const pathMap = createOperationIdToPathMap(openapi as OpenAPIV3.Document);
 /**
  * Enum representing the different base GPT models available.
  */
@@ -20,9 +52,14 @@ export enum Model {
   GPT3_5_CODE_INTERPRETER_16K = "GPT-3.5 Code Interpreter",
 }
 
+
+/**
+ * Interface representing information about an OpenAI model.
+ */
 interface ModelInfo {
   name: string;
 }
+
 
 export const modelMap: Record<Model, ModelInfo> = {
   [Model.GPT4]: {
@@ -79,9 +116,10 @@ export const OpenAIEndpoints = {
 export type OpenAIEndpoint = keyof typeof OpenAIEndpoints;
 
 /**
- * The system prompt 
+ * The system prompt for codesherpa.
  */
-export const SYSTEM_PROMPT = `
+export const SYSTEM_PROMPT_CODE_INTERPRETER = `
+Only use the functions you have been provided with.
 
 \`codesherpa\` namespace:
 A plugin for interactive code execution, file management, and shell command execution.
@@ -97,6 +135,9 @@ A plugin for interactive code execution, file management, and shell command exec
 File management
 - Embed images and other media files in responses using 'http://localhost:3333/static/images/' URL.
 - Access user-uploaded files in 'static/uploads/'
-
 `;
 
+export const SYSTEM_PROMPT = `
+You are ChatGPT, a large language model trained by OpenAI. 
+Follow the user's instructions carefully. Respond using markdown.
+`;

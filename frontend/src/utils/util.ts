@@ -59,3 +59,42 @@ export function descapeJsonString(escapedString: string): string {
 
     return escapedString.replace(/\\\\|\\\/|\\"|\\n|\\r|\\t|\\f/g, char => descapeMap[char]);
 }
+
+/**
+ * Handles a function call by parsing the function call, determining the endpoint based on the function name,
+ * descaping and parsing the arguments, and sending a POST request to the endpoint with the arguments.
+ * @param functionCall The function call to handle.
+ * @returns The parsed function call response.
+ */
+export const handleFunctionCall = async (functionCall: string) => {
+    let parsedFunctionCallResponse;
+    try {
+        const parsed = JSON.parse(functionCall);
+        let functionName = parsed.function_call.name;
+        let functionArgumentsStr = parsed.function_call.arguments;
+
+        // Descape and parse the arguments
+        let descapeArgumentsStr = descapeJsonString(functionArgumentsStr);
+
+        // Determine the endpoint based on the functionName
+        let endpoint = '';
+        if (functionName === 'repl_repl_post') {
+            endpoint = '/repl';
+        } else if (functionName === 'command_endpoint_command_post') {
+            endpoint = '/command';
+        }
+
+        const pluginResponse = await fetch(`http://localhost:3333${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: descapeArgumentsStr
+        });
+
+        parsedFunctionCallResponse = await pluginResponse.json();
+    } catch (error) {
+        // not a function call
+        // console.error('Error handling function call:', error);
+    }
+
+    return parsedFunctionCallResponse;
+};

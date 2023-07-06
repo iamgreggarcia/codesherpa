@@ -1,6 +1,5 @@
-// src/pages/chat.tsx
 import { useState, useEffect, useRef, MutableRefObject, useCallback } from 'react';
-import { Model, SYSTEM_PROMPT } from '@/constants/openai';
+import { Model, pathMap, SYSTEM_PROMPT, SYSTEM_PROMPT_CODE_INTERPRETER } from '@/constants/openai';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import ModelSelector from '@/components/model-selector';
 import ChatMessage from '@/components/chat-message';
@@ -10,16 +9,18 @@ import { toast } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([{ role: 'system', content: SYSTEM_PROMPT ?? '' }]);
+  const [selectedModel, setSelectedModel] = useState(Model.GPT3_5_CODE_INTERPRETER_16K);
+  const [messages, setMessages] = useState<Message[]>([{ role: 'system', content: selectedModel === Model.GPT3_5_CODE_INTERPRETER_16K || Model.GPT4_CODE_INTERPRETER ? SYSTEM_PROMPT_CODE_INTERPRETER : SYSTEM_PROMPT}]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [messageIsStreaming, setMessageIsStreaming] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(Model.GPT3_5_CODE_INTERPRETER_16K);
+  const [functionCallArgs, setFunctionCallArgs] = useState<string>('');
   const [conversationStarted, setConversationStarted] = useState(false);
   const [functionCall, setFunctionCall] = useState(null);
   const [isFunctionCall, setIsFunctionCall] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const cancelStreamRef: MutableRefObject<boolean> = useRef(false);
+  const accumulatedChunksRef: MutableRefObject<string> = useRef('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
 
   const isMobile = () => {
@@ -45,22 +46,10 @@ export default function Chat() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(`${file.name} uploaded successfully`, {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
-
-
+        console.log('OK')
+        toast.success('File uploaded successfully');
         // Save the URL
         setUploadedFileUrl(data.url);
-        console.log('data.url: ', data.url)
-        handleSendMessage(null, `File uploaded successfully: **[${file.name}](${data.url})**`);
         console.log('data.url: ', data.url)
       } else {
         toast.error(`Upload failed: ${data.message}`);
@@ -79,7 +68,7 @@ export default function Chat() {
     });
     const reader = response.body?.getReader();
     const decoder = new TextDecoder('utf-8');
-    let buffer = '';
+    let assistantMessageContent = '';
     let isFunction = false;
     let first = true;
     let done = false;
@@ -97,39 +86,37 @@ export default function Chat() {
           break;
         }
         let decodedValue = decoder.decode(value);
-        buffer += decodedValue;
-
-        const functionCallStart = buffer.indexOf('{"function_call":');
-        const functionCallEnd = buffer.indexOf('}', functionCallStart);
-        if (functionCallStart !== -1 && functionCallEnd !== -1) {
+        assistantMessageContent += decodedValue;
+        if (decodedValue.startsWith('{"function_call":')) {
           isFunction = true;
           setIsFunctionCall(true);
-          const functionCall = buffer.substring(functionCallStart, functionCallEnd + 1);
-          buffer = buffer.substring(functionCallEnd + 1);
-          decodedValue = functionCall;
+        }
 
+        if (isFunction) {
           if (first) {
             first = false;
             const assistantMessage: Message = { role: 'assistant', name: 'function_call', content: decodedValue ?? '' };
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
+
           } else {
             setMessages(prevMessages => {
               const updatedMessages = [...prevMessages];
               const lastMessage = updatedMessages[updatedMessages.length - 1];
-              lastMessage.content = decodedValue;
+              lastMessage.content = assistantMessageContent;
               return updatedMessages;
             });
           }
-        } else if (!isFunction) {
+        } else {
           if (first) {
             first = false;
             const assistantMessage: Message = { role: 'assistant', content: decodedValue ?? '' };
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
+
           } else {
             setMessages(prevMessages => {
               const updatedMessages = [...prevMessages];
               const lastMessage = updatedMessages[updatedMessages.length - 1];
-              lastMessage.content += decodedValue;
+              lastMessage.content = assistantMessageContent;
               return updatedMessages;
             });
           }
@@ -137,15 +124,15 @@ export default function Chat() {
       }
     }
 
-    return buffer;
+    return assistantMessageContent;
   };
 
   const handleSendMessage = useCallback(
-    async (event: React.FormEvent | null, content: string = newMessage) => {
-      event?.preventDefault();
+    async (event: React.FormEvent) => {
+      event.preventDefault();
       setMessageIsStreaming(true);
       setConversationStarted(true);
-      const newUserMessage: Message = { role: 'user', content: content ?? '' };
+      const newUserMessage: Message = { role: 'user', content: newMessage ?? ''};
       setNewMessage('');
       setMessages(prevMessages => [...prevMessages, newUserMessage]);
 
@@ -155,6 +142,7 @@ export default function Chat() {
         console.log('assistantMessageContent FIRST: ', assistantMessageContent);
         try {
           const parsed = JSON.parse(assistantMessageContent);
+          alert('function') 
           let functionName = parsed.function_call.name;
           let functionArgumentsStr = parsed.function_call.arguments;
 
@@ -164,7 +152,6 @@ export default function Chat() {
           setFunctionCall(parsed.function_call);
           console.log('function name: ', functionName);
           const requestBody = functionArgumentsStr;
-
           // Determine the endpoint based on the functionName
           let endpoint = '';
           if (functionName === 'repl_repl_post') {
@@ -185,18 +172,14 @@ export default function Chat() {
           setMessages(prevMessages => [...prevMessages, pluginResponseMessage]);
 
           console.log('latest message: ', messages[messages.length]);
-          // console.log('parsed function call response: ', parsedFunctionCallResponse);
-          // console.log('function call: ', parsed.function_call);
-          // console.log('response: ', pluginResponse);
-          // console.log('response.result: ', parsedFunctionCallResponse.result)
 
-          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? '' };
+
+          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? ''};
           setMessages(prevMessages => [...prevMessages, functionCallMessage]);
           let secondAssistantMessageContent = await fetchChat([...messages, functionCallMessage], abortController);
           console.log('secondAssistantMessageContent INNER TRY: ', secondAssistantMessageContent);
         } catch (error) {
           // If parsing fails, continue accumulating chunks 
-          // console.log('error: ', error);
         }
       } catch (error) {
         if (error instanceof OpenAIError) {
@@ -288,7 +271,7 @@ export default function Chat() {
                 </button>
                 <textarea
                   ref={textareaRef}
-                  className="dark:outline-none my-0 mr-2 ml-2 w-full resize-none bg-slate-200 rounded-md p-0 py-2 pr-12 pl-10 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-10 placeholder:text-gray-400 dark:placeholder:text-gray-300 min-h-14"
+                  className="outline-none my-0 mr-2 ml-2 w-full resize-none bg-slate-200 rounded-md p-0 py-2 pr-12 pl-10 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-10 placeholder:text-gray-400 dark:placeholder:text-gray-300 min-h-14"
                   style={{
                     resize: 'none',
                     bottom: `${textareaRef?.current?.scrollHeight}px`,
@@ -340,11 +323,11 @@ export default function Chat() {
               </div>
             </div>
             <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">            <a
-              href="https://github.com/mckaywrigley/chatbot-ui"
+              href="https://github.com/iamgreggarcia/codesherpa"
               target="_blank"
               rel="noreferrer"
               className="underline"
-            >
+            > 
             </a>
               {' '}
 
