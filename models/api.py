@@ -34,3 +34,35 @@ class CommandExecutionRequest(BaseModel):
                 "command": "ls -la"
             }
         }
+
+class CodeExecutionResponse(BaseModel):
+    """
+    A Pydantic model representing the response from a code execution request.
+
+    Attributes:
+        result (str): The result of the code execution.
+    """
+    result: str = Field(..., example="Hello, World!")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "result": "Hello, World!"
+            }
+        }
+
+class CommandExecutionResponse(BaseModel):
+    """
+    A Pydantic model representing the response from a command execution request.
+
+    Attributes:
+        result (str): The result of the command execution.
+    """
+    result: str = Field(..., example="Hello, World!")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "result": "Hello, World!"
+            }
+        }

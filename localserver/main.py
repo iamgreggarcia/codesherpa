@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from loguru import logger
 import uvicorn
 
-from models.api import CodeExecutionRequest, CommandExecutionRequest
+from models.api import CodeExecutionRequest, CommandExecutionRequest, CodeExecutionResponse, CommandExecutionResponse
 from executors.executor import PythonExecutor, CppExecutor, RustExecutor
 from utils.plugin import load_manifest
 
@@ -39,6 +39,17 @@ app = FastAPI(
   "A REPL for your chat. Write and execute code, upload files for data analysis, and more.",
 )
 
+@app.on_event("startup")
+def startup_event():
+    openapi_schema = app.openapi()
+    openapi_schema["servers"] = [
+        {
+            "url": "http://localhost:3333",
+            "description": "Local server",
+        }
+    ]
+    app.openapi_schema = openapi_schema
+
 executors = {
     "python": PythonExecutor(),
     "c++": CppExecutor(),
@@ -49,7 +60,9 @@ PORT = 3333
 
 origins = [
     f"http://localhost:{PORT}",
+    "http://localhost:3002",
     "http://localhost:3001",
+    "http://localhost:3000",
     "https://chat.openai.com",
 ]
 
@@ -119,7 +132,7 @@ async def upload_file(file: UploadFile = File(...)):
         return {"error": str(e)}
 
 
-@app.post("/repl")
+@app.post("/repl", response_model=CodeExecutionResponse)
 def repl(request: CodeExecutionRequest):
     """
     Exexute code. 
@@ -129,7 +142,7 @@ def repl(request: CodeExecutionRequest):
         request (CodeExecutionRequest): The request object containing the code to execute.
 
     Returns:
-        dict: The result of the code execution.
+        CodeExecutionResponse: The result of the code execution.
     """
     logger.info(f"Received request for REPL execution: {request}")
 
@@ -173,7 +186,7 @@ async def execute_command(command: str) -> str:
         return f"Error executing command: {str(e)}"
 
 
-@app.post("/command")
+@app.post("/command", response_model=CommandExecutionResponse)
 async def command_endpoint(command_request: CommandExecutionRequest):
     """
     Run commands.
@@ -182,7 +195,7 @@ async def command_endpoint(command_request: CommandExecutionRequest):
         command_request (CommandExecutionRequest): The request object containing the command to execute.
 
     Returns:
-        dict: The result of the command execution.
+        CommandExecutionResponse: The result of the command execution.
     """
     logger.info(f"Executing command with request: {command_request}")
     try:
