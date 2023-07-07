@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     make \
     git \
     gnupg \
-    lsb-release
+    lsb-release && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create a symbolic link for Python
 RUN ln -s /usr/bin/python3.10 /usr/bin/python
