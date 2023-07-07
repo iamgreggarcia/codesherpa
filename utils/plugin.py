@@ -11,12 +11,15 @@ description_for_model = textwrap.dedent(f"""
 
    `/repl` endpoint
     - Execute Python code interactively for general programming, tasks, data analysis, visualizations, and more.
-    - Pre-installed packages: matplotlib, seaborn, pandas, numpy, scipy, openpyxl.
+    - Pre-installed packages: matplotlib, seaborn, pandas, numpy, scipy, openpyxl.If you need to install additional packages, use the `pip install` command.
+    - When a user asks for visualization, save the plot to `static/images/` directory, and embed it in the response using `http://localhost:{PORT}/static/images/` URL.
+    - Always save alls media files created to `static/images/` directory, and embed them in responses using `http://localhost:{PORT}/static/images/` URL.
 
     `/command` endpoint
     - Run terminal commands and interact with the filesystem, run scripts, and more.
-    - Embed media files created or uploaded using `http://localhost:{PORT}/static/images/` URL in responses.
-    - Access user-uploaded files in `static/uploads/` directory using `http://localhost:{PORT}/static/uploads/` URL.
+    - Install python packages using `pip install` command.
+    - Always embed media files created or uploaded using `http://localhost:{PORT}/static/images/` URL in responses. 
+    - Access user-uploaded files in`static/uploads/` directory using `http://localhost:{PORT}/static/uploads/` URL.
 
     File management
     - Provide 'Upload file' link for users: http://localhost:{PORT}/upload

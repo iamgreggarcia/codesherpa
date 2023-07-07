@@ -18,6 +18,7 @@ export function parseOpenAIStreamData(data: string): string {
     
     for (const event of events) {
         // Trim the prefix to get the data part
+        console.log(event)
         let trimmedEvent = event.trim().substring(dataPrefix.length);
 
         if (trimmedEvent === "[DONE]") {
@@ -31,21 +32,21 @@ export function parseOpenAIStreamData(data: string): string {
 
             if (jsonData.choices[0]?.delta?.function_call?.name) {
                 isFirst = true;
-                console.log(`{"function_call": {"name": "${jsonData.choices[0]?.delta?.function_call.name}", "arguments": "`)
+                //console.log(`{"function_call": {"name": "${jsonData.choices[0]?.delta?.function_call.name}", "arguments": "`)
                 results.push(`{"function_call": {"name": "${jsonData.choices[0]?.delta?.function_call.name}", "arguments": "`);
             } else if (jsonData.choices[0]?.delta?.function_call?.arguments) {
                 const argumentChunk: string = isFirst ? jsonData.choices[0].delta.function_call.arguments.trim() : jsonData.choices[0].delta.function_call.arguments;
                 isFirst = false;
-                console.log(`${escapeJsonString(argumentChunk)}`);
+                //console.log(`${escapeJsonString(argumentChunk)}`);
                 results.push(`${escapeJsonString(argumentChunk)}`);
             } else if (jsonData.choices[0]?.finish_reason === 'function_call') {
                 isFirst = true;
-                console.log('"}}');
+                //console.log('"}}');
                 results.push('"}}');
             } else {
                 // Adding null check before pushing to results
                 if(jsonData.choices[0]?.delta?.content) {
-                    console.log(jsonData.choices[0]?.delta?.content)
+                    //console.log(jsonData.choices[0]?.delta?.content)
                     results.push(jsonData.choices[0]?.delta?.content);
                 }
                 isFirst = true;
