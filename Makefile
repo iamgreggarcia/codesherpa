@@ -29,4 +29,3 @@ dev:
 
 start:
 	poetry run start
-61
