@@ -186,7 +186,7 @@ export default function Chat() {
           // });
           console.log('parsedFunctionCallResponse: ', parsedFunctionCallResponse)
           console.log('parsedFunctionCallResponse.result: ', parsedFunctionCallResponse.result ?? '')
-          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? 'ok' };
+          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? 'result: ok' };
           setMessages(prevMessages => [...prevMessages, functionCallMessage]);
           fetchChat([...messages, functionCallMessage], abortController);
         }
@@ -252,7 +252,7 @@ export default function Chat() {
             <div className={`flex flex-row justify-center z-50 items-center pt-0 mx-0 md:mx-0 ${conversationStarted ? 'fixed' : ''}`}>
               <ModelSelector selectedModel={selectedModel} setSelectedModel={setSelectedModel} conversationStarted={conversationStarted} />
             </div>
-            <div className="w-full mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto">
+            <div className=" mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto">
               <div className="flex-1 overflow-auto mt-12 mb-40 bg-transparent">
                 {messages.map((message, index) => message.role !== 'system' && <ChatMessage key={index} message={message} isStreaming={messageIsStreaming} streamingMessageIndex={messages.length - 1} currentMessageIndex={index} isFunctionCall={isFunctionCall} selectedModel={selectedModel} />)}
                 <div ref={messageEndRef} />
