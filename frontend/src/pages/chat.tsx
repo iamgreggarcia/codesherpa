@@ -88,9 +88,16 @@ export default function Chat() {
         }
         let decodedValue = decoder.decode(value);
         assistantMessageContent += decodedValue;
-        if (decodedValue.startsWith('{"function_call":')) {
-          isFunction = true;
-          setIsFunctionCall(true);
+
+        // Check if the accumulated chunks form a complete JSON object
+        try {
+          const parsed = JSON.parse(assistantMessageContent);
+          if (parsed.function_call) {
+            isFunction = true;
+            setIsFunctionCall(true);
+          }
+        } catch (error) {
+          // If parsing fails, continue accumulating chunks
         }
 
         if (isFunction) {
@@ -140,17 +147,23 @@ export default function Chat() {
       const abortController = new AbortController();
       try {
         let assistantMessageContent = await fetchChat([...messages, newUserMessage], abortController);
-        console.log('assistantMessageContent FIRST: ', assistantMessageContent);
-        try {
-          const parsed = JSON.parse(assistantMessageContent);
-          let functionName = parsed.function_call.name;
+
+        // Identify the start of the function call
+        const functionCallIndex = assistantMessageContent.indexOf('{"function_call":');
+        console.log('functionCallIndex: ', functionCallIndex)
+        if (functionCallIndex !== -1) {
+          // Extract the function call
+          const functionCallStr = assistantMessageContent.slice(functionCallIndex);
+          console.log('functionCallStr: ', functionCallStr)
+          // Parse the function call as JSON
+          const parsed  = JSON.parse(functionCallStr);
+          console.log('parsed: ', parsed)
+          let functionName = parsed.function_call.name
           let functionArgumentsStr = parsed.function_call.arguments;
 
-          // Descape and parse the arguments
-          // let descapeArgumentsStr = descapeJsonString(functionArgumentsStr);
-          // let functionArguments = JSON.parse(descapeArgumentsStr);
-          setFunctionCall(parsed.function_call);
-          console.log('function name: ', functionName);
+          // setFunctionCall(parsed);
+          console.log('function name: ', parsed.function_call.name);
+          console.log('function arguments: ', parsed.function_call.arguments);
           const requestBody = functionArgumentsStr;
           let endpoint = pathMap[functionName as keyof operations];
           if (!endpoint) {
@@ -164,19 +177,18 @@ export default function Chat() {
           });
 
           const parsedFunctionCallResponse = await pluginResponse.json();
-          const stringifiedparsedFunctionCallResponse = JSON.stringify(parsedFunctionCallResponse);
-          const pluginResponseMessage: Message = { role: 'assistant', name: 'function_call', content: stringifiedparsedFunctionCallResponse ?? '' };
-          setMessages(prevMessages => [...prevMessages, pluginResponseMessage]);
-
-          console.log('latest message: ', messages[messages.length]);
-
-
-          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? '' };
+          // const stringifiedparsedFunctionCallResponse = JSON.stringify(parsedFunctionCallResponse);
+          // setMessages(prevMessages => {
+          //   const updatedMessages = [...prevMessages];
+          //   const lastMessage = updatedMessages[updatedMessages.length - 1];
+          //   lastMessage.content = `\n${stringifiedparsedFunctionCallResponse}`;
+          //   return updatedMessages;
+          // });
+          console.log('parsedFunctionCallResponse: ', parsedFunctionCallResponse)
+          console.log('parsedFunctionCallResponse.result: ', parsedFunctionCallResponse.result ?? '')
+          const functionCallMessage: Message = { role: 'function', name: functionName, content: parsedFunctionCallResponse.result ?? 'ok' };
           setMessages(prevMessages => [...prevMessages, functionCallMessage]);
-          let secondAssistantMessageContent = await fetchChat([...messages, functionCallMessage], abortController);
-          console.log('secondAssistantMessageContent INNER TRY: ', secondAssistantMessageContent);
-        } catch (error) {
-          // If parsing fails, continue accumulating chunks 
+          fetchChat([...messages, functionCallMessage], abortController);
         }
       } catch (error) {
         if (error instanceof OpenAIError) {
