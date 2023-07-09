@@ -8,7 +8,8 @@ import { OpenAIError, descapeJsonString } from '@/utils/util';
 import { Message } from '@/utils/services/openai/openai-stream';
 import { toast } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
-import { text } from 'node:stream/consumers';
+import { UploadedFile } from '@/components/uploaded-file';
+
 
 export default function Chat() {
   const [selectedModel, setSelectedModel] = useState(Model.GPT3_5_CODE_INTERPRETER_16K);
@@ -24,6 +25,8 @@ export default function Chat() {
   const cancelStreamRef: MutableRefObject<boolean> = useRef(false);
   const accumulatedChunksRef: MutableRefObject<string> = useRef('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
 
   const isMobile = () => {
     const userAgent =
@@ -61,6 +64,15 @@ export default function Chat() {
     }
   };
 
+  /**
+   * This function fetches the chat messages from the backend API and updates the messages state.
+   * It sends a POST request to the '/api/chat' endpoint with the current messages and selected model.
+   * If the response contains a function call, it extracts the function name and arguments,
+   * and displays the function call in the chat.
+   * @param messages - The current chat messages.
+   * @param abortController - The AbortController used to cancel the fetch request.
+   * @returns The content of the assistant message.
+   */
   const fetchChat = async (messages: Message[], abortController: AbortController) => {
     const response = await fetch('/api/chat', {
       method: 'POST',
@@ -136,6 +148,13 @@ export default function Chat() {
     return assistantMessageContent;
   };
 
+  /**
+   * This function handles sending a message to the chatbot and receiving a response.
+   * It is triggered when the user submits a message through the chat input field.
+   * If the response contains a function call, it extracts the function name and arguments,
+   * sends a POST request to the corresponding endpoint, and displays the result in the chat.
+   * @param event - The form event triggered by submitting the message.
+   */
   const handleSendMessage = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
@@ -145,24 +164,28 @@ export default function Chat() {
       setNewMessage('');
       setMessages(prevMessages => [...prevMessages, newUserMessage]);
 
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "56px";
+      }
+
+      if (uploadedFileUrl) {
+        newUserMessage.content += `\nFile: ${uploadedFileUrl}`;
+      }
+
       const abortController = new AbortController();
       try {
         let assistantMessageContent = await fetchChat([...messages, newUserMessage], abortController);
 
-        // Identify the start of the function call
         const functionCallIndex = assistantMessageContent.indexOf('{"function_call":');
         console.log('functionCallIndex: ', functionCallIndex)
         if (functionCallIndex !== -1) {
-          // Extract the function call
           const functionCallStr = assistantMessageContent.slice(functionCallIndex);
           console.log('functionCallStr: ', functionCallStr)
-          // Parse the function call as JSON
           const parsed = JSON.parse(functionCallStr);
           console.log('parsed: ', parsed)
           let functionName = parsed.function_call.name
           let functionArgumentsStr = parsed.function_call.arguments;
 
-          // setFunctionCall(parsed);
           console.log('function name: ', parsed.function_call.name);
           console.log('function arguments: ', parsed.function_call.arguments);
           const requestBody = functionArgumentsStr;
@@ -193,10 +216,8 @@ export default function Chat() {
         }
       } catch (error) {
         if (error instanceof OpenAIError) {
-          // Handle OpenAIError
           alert(`OpenAIError: ${error.message}`);
         } else if (error instanceof Error) {
-          // Handle other errors
           alert(`Error: ${error.message}`);
         }
         setMessageIsStreaming(false);
@@ -207,7 +228,7 @@ export default function Chat() {
       setIsFunctionCall(false);
       setNewMessage('');
     },
-    [messages, newMessage, selectedModel, cancelStreamRef],
+    [messages, newMessage, selectedModel, cancelStreamRef, uploadedFileUrl],
   );
 
   const stopConversationHandler = () => {
@@ -265,6 +286,13 @@ export default function Chat() {
 
 
               <div className="relative flex mx-1 flex-col h-full flex-1 items-stretch border-black/10 bg-slate-100 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:bg-gray-700 dark:text-white dark:focus:border-12 dark:shadow-[0_0_20px_rgba(0,0,0,0.10)] sm:mx-4 rounded-xl outline-none">
+
+                {true &&
+                  <div className="mb-3 mx-[10px] md:mx-0">
+                    {/* The UploadedFile component should go here */}
+                    <UploadedFile filename="your-file-name" onDelete={() => {}} />
+                  </div>
+                }
                 <textarea
                   ref={textareaRef}
                   className="flex-grow outline-none m-0 w-full resize-none bg-transparent pt-4 pr-12 pl-12 ml-4 text-black dark:bg-transparent dark:text-white md:pl-[30px] rounded-md placeholder:text-gray-400 dark:placeholder:text-gray-300"
@@ -273,7 +301,7 @@ export default function Chat() {
                     overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden'}`,
                     minHeight: '56px',
                     cursor: 'text',
-                    
+
                   }}
                   placeholder={`Send a message`}
                   value={newMessage}
@@ -286,8 +314,9 @@ export default function Chat() {
                       e.preventDefault();
                       handleSendMessage(e);
                     }
-                  }}
-                />
+                  }} />
+
+
                 <input
                   type="file"
                   id="fileUpload"
