@@ -143,6 +143,7 @@ A plugin for interactive code execution, file management, and shell command exec
 '/repl' endpoint
 - Execute Python code interactively for general programming, tasks, data analysis, visualizations, and more.
 - Pre-installed packages: matplotlib, seaborn, pandas, numpy, scipy, openpyxl.
+- results that don't have a value will have a content value of 'result: \"ok\"' 
 '/command' endpoint
 - Run terminal commands and interact with the filesystem, run scripts, and more.
 - Embed media files created or uploaded using 'http://localhost:3333/static/images/' URL in responses.

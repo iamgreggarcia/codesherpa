@@ -8,6 +8,7 @@ import { OpenAIError, descapeJsonString } from '@/utils/util';
 import { Message } from '@/utils/services/openai/openai-stream';
 import { toast } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
+import { text } from 'node:stream/consumers';
 
 export default function Chat() {
   const [selectedModel, setSelectedModel] = useState(Model.GPT3_5_CODE_INTERPRETER_16K);
@@ -156,7 +157,7 @@ export default function Chat() {
           const functionCallStr = assistantMessageContent.slice(functionCallIndex);
           console.log('functionCallStr: ', functionCallStr)
           // Parse the function call as JSON
-          const parsed  = JSON.parse(functionCallStr);
+          const parsed = JSON.parse(functionCallStr);
           console.log('parsed: ', parsed)
           let functionName = parsed.function_call.name
           let functionArgumentsStr = parsed.function_call.arguments;
@@ -219,7 +220,7 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    if (textareaRef.current) {
+    if (textareaRef.current && newMessage !== '') {
       // Reset the height to auto to reduce the height and recalculate scrollHeight
       textareaRef.current.style.height = 'inherit';
 
@@ -227,10 +228,10 @@ export default function Chat() {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
 
       // Set the maxHeight to limit how much the textarea can expand
-      textareaRef.current.style.maxHeight = '400px';
+      textareaRef.current.style.maxHeight = '200px';
 
       // Set the overflow to auto if the content exceeds maxHeight
-      textareaRef.current.style.overflowY = textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden';
+      textareaRef.current.style.overflowY = textareaRef.current.scrollHeight > 200 ? 'auto' : 'hidden';
     }
   }, [newMessage]);
 
@@ -240,7 +241,7 @@ export default function Chat() {
     if (messageEndRef.current) {
       messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);
+  }, [messages, textareaRef.current]);
 
   return (
     <>
@@ -261,38 +262,20 @@ export default function Chat() {
           </div>
           <div className="fixed border-0 bottom-0 left-0 w-full dark:border-orange-200 bg-gradient-to-b from-transparent via-white to-white pt-6 dark:via-[#1f232a] dark:to-[#1f232a] md:pt-2">
             <div className="stretch mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-3xl">
-              <div className="relative mx-2 flex w-full flex-grow flex-col rounded-xl border-black/10 bg-slate-100 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:bg-gray-700 dark:text-white  dark:focus:border-12 dark:shadow-[0_0_20px_rgba(0,0,0,0.10)] sm:mx-4 outline-none">
-                {/* Upload button. Upload files to http://localhost:3333/upload'*/}
-                <input
-                  type="file"
-                  id="fileUpload"
-                  style={{ display: 'none' }}
-                  onChange={onUploadFile}
-                />
-                <button
-                  className="absolute left-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:text-neutral-100 dark:hover:text-neutral-100"
-                  onClick={() => document.getElementById('fileUpload')?.click()}
-                  onKeyDown={() => { }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                  </svg>
-                </button>
+
+
+              <div className="relative flex mx-1 flex-col h-full flex-1 items-stretch border-black/10 bg-slate-100 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:bg-gray-700 dark:text-white dark:focus:border-12 dark:shadow-[0_0_20px_rgba(0,0,0,0.10)] sm:mx-4 rounded-xl outline-none">
                 <textarea
                   ref={textareaRef}
-                  className="outline-none my-0 mr-2 ml-2 w-full resize-none bg-slate-200 rounded-md p-0 py-2 pr-12 pl-10 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-10 placeholder:text-gray-400 dark:placeholder:text-gray-300 min-h-14"
+                  className="flex-grow outline-none m-0 w-full resize-none bg-transparent pt-4 pr-12 pl-12 ml-4 text-black dark:bg-transparent dark:text-white md:pl-[30px] rounded-md placeholder:text-gray-400 dark:placeholder:text-gray-300"
                   style={{
-                    resize: 'none',
-                    bottom: `${textareaRef?.current?.scrollHeight}px`,
                     maxHeight: '400px',
-                    overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
-                      ? 'auto'
-                      : 'hidden'
-                      }`,
+                    overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden'}`,
+                    minHeight: '56px',
+                    cursor: 'text',
+                    
                   }}
-                  placeholder={
-                    `Send a message`
-                  }
+                  placeholder={`Send a message`}
                   value={newMessage}
                   rows={1}
                   onCompositionStart={() => setIsTyping(true)}
@@ -305,31 +288,49 @@ export default function Chat() {
                     }
                   }}
                 />
-                {messageIsStreaming ? (
-                  <button
-                    type="submit"
-                    className={`absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-90 bg-red-500 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
-                    onClick={stopConversationHandler}
-                  >
-                    <span className="">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path className="animate-pulse duration-150" strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
-                      </svg>
-                    </span>
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className={`${newMessage.length === 0 ? '-rotate-90 transform-gpu absolute bg-transparent rounded-3xl top-2 right-2 p-1 text-neutral-800 opacity-60  dark:text-neutral-100 cursor-not-allowed ease-in duration-200 transition-all' : 'rotate-0 transform-gpu bottom-2 mr-2 absolute right-2  rounded-sm p-1 text-neutral-100  bg-fuchsia-500  dark:text-neutral-100 dark:hover:text-neutral-200 ease-out duration-500 transition-all'}`}
-                    onClick={handleSendMessage}
-                    disabled={newMessage.length === 0}
-                  >
-                    <span className=''>
-                      <PaperAirplaneIcon className={`${newMessage.length === 0 ? 'h-0 w-0' : 'h-6 w-6'}`} />
-                    </span>
-                  </button>
-                )}
+                <input
+                  type="file"
+                  id="fileUpload"
+                  className="hidden"
+                  onChange={onUploadFile}
+                />
+                <button
+                  className="absolute left-4 bottom-4 p-0 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:hover:bg-neutral-200 dark:hover:rounded-full transition-all duration-200 dark:text-neutral-100 dark:hover:text-neutral-100"
+                  onClick={() => document.getElementById('fileUpload')?.click()}
+                  onKeyDown={() => { }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+                <button
+                  type="submit"
+                  className={`absolute right-2 bottom-4 p-1 rounded-md text-neutral-800 opacity-90 ${messageIsStreaming ? 'bg-red-500' : newMessage.length === 0 ? 'bg-transparent text-neutral-800 opacity-60' : 'bg-fuchsia-500 text-neutral-100'} dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
+                  onClick={messageIsStreaming ? stopConversationHandler : handleSendMessage}
+                  disabled={newMessage.length === 0}
+                >
+                  {messageIsStreaming ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path className="animate-pulse duration-150" strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                    </svg>
+                  ) : (
+                    <PaperAirplaneIcon className={`${newMessage.length === 0 ? 'h-0 w-0' : 'h-4 w-4'}`} />
+                  )}
+                </button>
+                <button
+                  className=" absolute left-4 bottom-2 p-0 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:hover:bg-neutral-200 dark:hover:rounded-full transition-all duration-200 dark:text-neutral-100 dark:hover:text-neutral-100"
+                  onClick={() => {/* regenerate response function */ }}
+                  onKeyDown={() => { }}
+                >
+                  {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                  </svg> */}
+                </button>
               </div>
+
+
+
+
             </div>
             <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">            <a
               href="https://github.com/iamgreggarcia/codesherpa"
