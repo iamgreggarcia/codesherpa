@@ -4,7 +4,7 @@ import { operations } from '@/utils/services/plugin-protocol/codesherpa';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import ModelSelector from '@/components/model-selector';
 import ChatMessage from '@/components/chat-message';
-import { OpenAIError } from '@/utils/util';
+import { OpenAIError, descapeJsonString } from '@/utils/util';
 import { Message } from '@/utils/services/openai/openai-stream';
 import { toast } from 'react-toastify';
 import "react-toastify/dist/ReactToastify.css";
@@ -17,13 +17,15 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [messageIsStreaming, setMessageIsStreaming] = useState(false);
+  const [functionCallArgs, setFunctionCallArgs] = useState<string>('');
   const [conversationStarted, setConversationStarted] = useState(false);
+  const [functionCall, setFunctionCall] = useState(null);
   const [isFunctionCall, setIsFunctionCall] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const cancelStreamRef: MutableRefObject<boolean> = useRef(false);
+  const accumulatedChunksRef: MutableRefObject<string> = useRef('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [fileIsAttached, setFileIsAttached] = useState<boolean>(false);
 
 
   const isMobile = () => {
@@ -58,7 +60,6 @@ export default function Chat() {
 
         setUploadedFileName(fileName);
         setUploadedFileUrl(data.url);
-        setFileIsAttached(true);
         console.log('data.url: ', data.url)
       } else {
         toast.error(`Upload failed: ${data.message}`);
@@ -185,7 +186,6 @@ export default function Chat() {
       setConversationStarted(true);
       const newUserMessage: Message = { role: 'user', content: newMessage ?? '' };
       setNewMessage('');
-      setFileIsAttached(false);
       setMessages(prevMessages => [...prevMessages, newUserMessage]);
 
       if (textareaRef.current) {
@@ -193,7 +193,7 @@ export default function Chat() {
       }
 
       if (uploadedFileUrl) {
-        newUserMessage.content += `\n\(Uploaded file: ${uploadedFileName})`;
+        newUserMessage.content += `\nFile: ${uploadedFileUrl}`;
       }
 
       const abortController = new AbortController();
@@ -371,7 +371,7 @@ export default function Chat() {
                       <path className="animate-pulse duration-150" strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
                     </svg>
                   ) : (
-                    <PaperAirplaneIcon className={`${newMessage.length === 0 && !fileIsAttached ? 'h-0 w-0' : 'h-4 w-4'}`} />
+                    <PaperAirplaneIcon className={`${newMessage.length === 0 ? 'h-0 w-0' : 'h-4 w-4'}`} />
                   )}
                 </button>
                 <button

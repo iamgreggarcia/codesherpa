@@ -30,5 +30,5 @@ export const FUNCTIONS: Array<any> = [
       },
       "required": ["command"]
     }
-  }
+  },
 ];

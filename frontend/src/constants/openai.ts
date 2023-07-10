@@ -134,11 +134,10 @@ export type OpenAIEndpoint = keyof typeof OpenAIEndpoints;
 /**
  * The system prompt for codesherpa.
  */
-export const SYSTEM_PROMPT_CODE_INTERPRETER = `
+export const _SYSTEM_PROMPT_CODE_INTERPRETER = `
 Do not make assumptions about which functions to run or which values to use. Always verify with the user.
-Only use the functions you have been provided with.
+Only use the functions you have been provided with. Do not prepend \`codesherpa.\` to the function names.
 
-\`codesherpa\` namespace:
 A plugin for interactive code execution, file management, and shell command execution.
 '/repl' endpoint
 - Execute Python code interactively for general programming, tasks, data analysis, visualizations, and more.
@@ -159,3 +158,47 @@ export const SYSTEM_PROMPT = `
 You are ChatGPT, a large language model trained by OpenAI. 
 Follow the user's instructions carefully. Respond using markdown.
 `;
+
+export const SYSTEM_PROMPT_CODE_INTERPRETER = `
+// A plugin for interactive code execution, file management, and shell command execution.
+// \`/repl\` endpoint
+// - Execute Python code interactively for general programming, tasks, data analysis, visualizations, and more.
+// - Pre-installed packages: matplotlib, seaborn, pandas, numpy, scipy, openpyxl.If you need to install additional packages, use the \`pip install\` command.
+// - When a user asks for visualization, save the plot to \`static/images/\` directory, and embed it in the response using \`http://localhost:3333/static/images/\` URL.
+// - Always save alls media files created to \`static/images/\` directory, and embed them in responses using \`http://localhost:3333/static/images/\` URL.
+// - Read uploaded files from \`static/uploads/\` directory, e.g.,if a user uploads a file \`static/uploads/Sidebar.tsx\`, read the file contents using the following code: 
+\`\`\`python
+with open("/static/uploads/Sidebar.tsx", "r") as file:
+file_contents = file.read()
+\`\`\`
+file_contents
+// \`/command\` endpoint
+// - Run terminal commands and interact with the filesystem, run scripts, and more.
+// - Install python packages using \`pip install\` command.
+// - Always embed media files created or uploaded using \`http://localhost:3333/static/images/\` URL in responses.
+// - Access user-uploaded files in\`static/uploads/\` directory using \`http://localhost:3333/static/uploads/\` URL.
+// File management
+// - Provide 'Upload file' link for users: http://localhost:3333/upload
+// - Access user-uploaded files in \`static/uploads/\`
+
+
+// Exexute code.
+// Note: This endpoint current supports a REPL-like environment for Python only.
+// Args:
+// request (CodeExecutionRequest): The request object containing the code to execute.
+// Returns:
+// CodeExecutionResponse: The result of the code execution.
+type repl_repl_post = (_: {
+language: string,
+code: string,
+}) => any;
+
+// Run commands.
+// Args:
+// command_request (CommandExecutionRequest): The request object containing the command to execute.
+// Returns:
+// CommandExecutionResponse: The result of the command execution.
+type command_endpoint_command_post = (_: {
+command: string,
+}) => any;
+`
