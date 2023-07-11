@@ -20,6 +20,7 @@
   :root {
     --background-start-rgb: 241, 245, 249;
     --background-end-rgb: 241, 245, 249;
+    --scrollbar-thumb-color: #6e6d6d;
   }
 }
 
@@ -75,18 +76,18 @@ textarea:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.26);
+  background: var(--scrollbar-thumb-color);
   border-radius: 10px;
   cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(230, 225, 225, 0.4);
+  background: var(--scrollbar-thumb-color);
   cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: rgba(181, 179, 179, 0.9);
+  background: var(--scrollbar-thumb-color);
   cursor: pointer;
 }
 

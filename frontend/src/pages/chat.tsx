@@ -24,7 +24,7 @@ export default function Chat() {
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [fileIsAttached, setFileIsAttached] = useState<boolean>(false);
-
+  const [resubmitLastMessage, setResubmitLastMessage] = useState(false);
 
   const isMobile = () => {
     const userAgent =
@@ -171,34 +171,39 @@ export default function Chat() {
     return assistantMessageContent;
   };
 
-  /**
-   * This function handles sending a message to the chatbot and receiving a response.
-   * It is triggered when the user submits a message through the chat input field.
-   * If the response contains a function call, it extracts the function name and arguments,
-   * sends a POST request to the corresponding endpoint, and displays the result in the chat.
-   * @param event - The form event triggered by submitting the message.
-   */
   const handleSendMessage = useCallback(
-    async (event: React.FormEvent) => {
-      event.preventDefault();
+    async (event?: React.FormEvent, deleteCount: number = 0) => {
+      event?.preventDefault();
       setMessageIsStreaming(true);
       setConversationStarted(true);
-      const newUserMessage: Message = { role: 'user', content: newMessage ?? '' };
-      setNewMessage('');
-      setFileIsAttached(false);
-      setMessages(prevMessages => [...prevMessages, newUserMessage]);
+      let chatHistory: Message[] = [];
+      if (deleteCount) {
+        const updatedMessages = [...messages];
+        for (let i = 0; i < deleteCount; i++) {
+          updatedMessages.pop();
+        }
+        setMessages(updatedMessages);
+        chatHistory = updatedMessages;
+      } else {
 
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "56px";
+        const newUserMessage: Message = { role: 'user', content: newMessage ?? '' };
+        setNewMessage('');
+        setFileIsAttached(false);
+        setMessages(prevMessages => [...prevMessages, newUserMessage]);
+
+        if (textareaRef.current) {
+          textareaRef.current.style.height = "56px";
+        }
+
+        if (uploadedFileUrl) {
+          newUserMessage.content += `\n\(Uploaded file: ${uploadedFileName})`;
+        }
+        chatHistory = [...messages, newUserMessage];
       }
-
-      if (uploadedFileUrl) {
-        newUserMessage.content += `\n\(Uploaded file: ${uploadedFileName})`;
-      }
-
       const abortController = new AbortController();
+
       try {
-        let assistantMessageContent = await fetchChat([...messages, newUserMessage], abortController);
+        let assistantMessageContent = await fetchChat(chatHistory, abortController);
 
         const functionCallIndex = assistantMessageContent.indexOf('{"function_call":');
         console.log('functionCallIndex: ', functionCallIndex)
@@ -216,7 +221,7 @@ export default function Chat() {
           let endpoint = pathMap[functionName as keyof operations];
           if (!endpoint) {
             // throw new Error('Endpoint is undefined');
-            const functionCallMessage: Message = { role: 'assistant', content: `I'm sorry, I used the incorret function name '${functionName}'. Let me try again:\n`};
+            const functionCallMessage: Message = { role: 'assistant', content: `I'm sorry, I used the incorret function name '${functionName}'. Let me try again:\n` };
             setMessages(prevMessages => [...prevMessages, functionCallMessage]);
             fetchChat([...messages, functionCallMessage], abortController);
           } else {
@@ -268,21 +273,41 @@ export default function Chat() {
     }, 1000);
   };
 
-  useEffect(() => {
-    if (textareaRef.current && newMessage !== '') {
-      // Reset the height to auto to reduce the height and recalculate scrollHeight
-      textareaRef.current.style.height = 'inherit';
+  const regenerateResponseHandler = async () => {
+    const lastUserMessageIndex = messages.reduce((lastIndex, message, index) => {
+      return message.role === 'user' ? index : lastIndex;
+    }, -1);
 
-      // Set the height to scrollHeight to expand the textarea
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-
-      // Set the maxHeight to limit how much the textarea can expand
-      textareaRef.current.style.maxHeight = '200px';
-
-      // Set the overflow to auto if the content exceeds maxHeight
-      textareaRef.current.style.overflowY = textareaRef.current.scrollHeight > 200 ? 'auto' : 'hidden';
+    if (lastUserMessageIndex === -1) {
+      return;
+    } else {
+      setResubmitLastMessage(true);
+      handleSendMessage(undefined, messages.length - lastUserMessageIndex - 1);
     }
-  }, [newMessage]);
+  };
+
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      if (newMessage === '') {
+        // Reset the height to its initial value when newMessage is an empty string
+        textareaRef.current.style.height = '56px';
+      } else {
+        // Reset the height to auto to reduce the height and recalculate scrollHeight
+        textareaRef.current.style.height = 'inherit';
+
+        // Set the height to scrollHeight to expand the textarea
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+
+        // Set the maxHeight to limit how much the textarea can expand
+        textareaRef.current.style.maxHeight = '200px';
+
+        // Set the overflow to auto if the content exceeds maxHeight
+        textareaRef.current.style.overflowY = textareaRef.current.scrollHeight > 200 ? 'auto' : 'hidden';
+      }
+    }
+  }, [newMessage, textareaRef.current]);
+
 
   const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -295,14 +320,13 @@ export default function Chat() {
   return (
     <>
       <div className="relative h-screen mx-0">
-
         <div className="flex flex-col h-screen p-6 mx-14">
-          <div className={`absolute top-0 left-0 w-full border-transparent  dark:border-white/20 dark:via-[#343541] dark:to-[#343541] 
-      ${conversationStarted ? 'pt-0 md:pt-0' : 'pt-8 md:pt-6'}`}>
+          <div className={`absolute top-0 left-0 w-full border-transparent dark:border-white/20 dark:via-[#343541] dark:to-[#343541] 
+        ${conversationStarted ? 'pt-0 md:pt-0' : 'pt-8 md:pt-6'}`}>
             <div className={`flex flex-row justify-center z-50 items-center pt-0 mx-0 md:mx-0 ${conversationStarted ? 'fixed' : ''}`}>
               <ModelSelector selectedModel={selectedModel} setSelectedModel={setSelectedModel} conversationStarted={conversationStarted} />
             </div>
-            <div className=" mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto">
+            <div className="mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto">
               <div className="flex-1 overflow-auto mt-12 mb-40 bg-transparent">
                 {messages.map((message, index) => message.role !== 'system' && <ChatMessage key={index} message={message} isStreaming={messageIsStreaming} streamingMessageIndex={messages.length - 1} currentMessageIndex={index} isFunctionCall={isFunctionCall} selectedModel={selectedModel} />)}
                 <div ref={messageEndRef} />
@@ -311,93 +335,119 @@ export default function Chat() {
           </div>
           <div className="fixed border-0 bottom-0 left-0 w-full dark:border-orange-200 bg-gradient-to-b from-transparent via-white to-white pt-6 dark:via-[#1f232a] dark:to-[#1f232a] md:pt-2">
             <div className="stretch mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-3xl">
-
-
-              <div className="relative flex mx-1 flex-col h-full flex-1 items-stretch border-black/10 bg-slate-100 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:bg-gray-700 dark:text-white dark:focus:border-12 dark:shadow-[0_0_20px_rgba(0,0,0,0.10)] sm:mx-4 rounded-xl outline-none">
-
-                {uploadedFileName &&
-                  <div className="md:mx-2 mt-2">
-                    {/* The UploadedFile component should go here */}
-                    <UploadedFile filename={uploadedFileName} onDelete={onDeleteFile} />
-                  </div>
-                }
-                <textarea
-                  ref={textareaRef}
-                  className="flex-grow outline-none m-0 w-full resize-none bg-transparent pt-4 pr-12 pl-12 ml-4 text-black dark:bg-transparent dark:text-white md:pl-[30px] rounded-md placeholder:text-gray-400 dark:placeholder:text-gray-300"
-                  style={{
-                    maxHeight: '400px',
-                    overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden'}`,
-                    minHeight: '56px',
-                    cursor: 'text',
-
-                  }}
-                  placeholder={`Send a message`}
-                  value={newMessage}
-                  rows={1}
-                  onCompositionStart={() => setIsTyping(true)}
-                  onCompositionEnd={() => setIsTyping(false)}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !isTyping && !isMobile() && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage(e);
-                    }
-                  }} />
-
-
-                <input
-                  type="file"
-                  id="fileUpload"
-                  className="hidden"
-                  onChange={onUploadFile}
-                />
-                <button
-                  className="absolute left-4 bottom-4 p-0 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:hover:bg-neutral-200 dark:hover:rounded-full transition-all duration-200 dark:text-neutral-100 dark:hover:text-neutral-100"
-                  onClick={() => document.getElementById('fileUpload')?.click()}
-                  onKeyDown={() => { }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-                <button
-                  type="submit"
-                  className={`absolute right-2 bottom-4 p-1 rounded-md text-neutral-800 opacity-90 ${messageIsStreaming ? 'bg-red-500' : newMessage.length === 0 ? 'bg-transparent text-neutral-800 opacity-60' : 'bg-fuchsia-500 text-neutral-100'} dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
-                  onClick={messageIsStreaming ? stopConversationHandler : handleSendMessage}
-                  disabled={newMessage.length === 0}
-                >
+              <div className="relative flex h-full flex-1 items-stretch md:flex-col" role="presentation">
+                <div className="h-full flex ml-1 md:w-full md:m-auto md:mb-2 gap-0 md:gap-2 justify-center">
                   {messageIsStreaming ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                      <path className="animate-pulse duration-150" strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
-                    </svg>
-                  ) : (
-                    <PaperAirplaneIcon className={`${newMessage.length === 0 && !fileIsAttached ? 'h-0 w-0' : 'h-4 w-4'}`} />
-                  )}
-                </button>
-                <button
-                  className=" absolute left-4 bottom-2 p-0 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:hover:bg-neutral-200 dark:hover:rounded-full transition-all duration-200 dark:text-neutral-100 dark:hover:text-neutral-100"
-                  onClick={() => {/* regenerate response function */ }}
-                  onKeyDown={() => { }}
-                >
+                    <button
+                      className="btn relative btn-neutral -z-0 border-0 md:border"
+                      onClick={stopConversationHandler}
+                    >
+                      <div className="flex w-full gap-2 items-center justify-center">
+                        {/* ... SVG for Stop Generating ... */}
+                        Stop Generating
+                      </div>
+                    </button>
+                  ) : conversationStarted ? (
+                    <button
+                      className="btn relative btn-neutral -z-0 border-0 md:border"
+                      onClick={regenerateResponseHandler}
+                    >
+                      <div className="flex w-full gap-2 items-center justify-center">
+                        {/* ... SVG for Regenerate Response ... */}
+                        Regenerate Response
+                      </div>
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="relative flex mx-1 flex-col h-full flex-1 items-stretch border-black/10 bg-slate-100 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:bg-gray-700 dark:text-white dark:focus:border-12 dark:shadow-[0_0_20px_rgba(0,0,0,0.10)] sm:mx-4 rounded-xl dark:outline-none outline-none">
+
+                  {uploadedFileName &&
+                    <div className="md:mx-2 mt-2">
+                      <UploadedFile filename={uploadedFileName} onDelete={onDeleteFile} />
+                    </div>
+                  }
+                  <textarea
+                    ref={textareaRef}
+                    className="flex-grow outline-none m-0 w-full dark:border-none border border-black resize-none bg-transparent py-4 pl-96  text-black dark:bg-transparent dark:text-white md:pl-[30px] rounded-md placeholder:text-gray-400 dark:placeholder:text-gray-300"
+                    style={{
+                      maxHeight: '400px',
+                      overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden'}`,
+                      minHeight: '56px',
+                      cursor: 'text',
+                      paddingLeft: `${selectedModel === Model.GPT3_5_CODE_INTERPRETER_16K || selectedModel === Model.GPT4_CODE_INTERPRETER ? '50px' : '30px'}`,
+                      paddingRight: '34px',
+
+                    }}
+                    placeholder={`Send a message`}
+                    value={newMessage}
+                    rows={1}
+                    onCompositionStart={() => setIsTyping(true)}
+                    onCompositionEnd={() => setIsTyping(false)}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !isTyping && !isMobile() && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage(e);
+                      }
+                    }} />
+
+
+                  <input
+                    type="file"
+                    id="fileUpload"
+                    className="hidden"
+                    onChange={onUploadFile}
+                  />
+                  {(selectedModel === Model.GPT3_5_CODE_INTERPRETER_16K || selectedModel === Model.GPT4_CODE_INTERPRETER) &&
+                    <button
+                      className="absolute left-4 bottom-4 p-0 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:hover:bg-neutral-200 dark:hover:rounded-full transition-all duration-200 dark:text-neutral-100 dark:hover:text-neutral-100"
+                      onClick={() => document.getElementById('fileUpload')?.click()}
+                      onKeyDown={() => { }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>}
+                  <button
+                    type="submit"
+                    className={`absolute right-3 bottom-4 p-1 rounded-md text-neutral-800 opacity-90 ${messageIsStreaming ? 'bg-red-500' : newMessage.length === 0 ? 'bg-transparent text-neutral-800 opacity-60' : 'bg-fuchsia-500 text-neutral-100'} dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
+                    onClick={messageIsStreaming ? stopConversationHandler : handleSendMessage}
+                    disabled={newMessage.length === 0 && !messageIsStreaming}
+                  >
+                    {messageIsStreaming ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path className="animate-pulse duration-150" strokeLinecap="round" strokeLinejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z" />
+                      </svg>
+                    ) : (
+                      <PaperAirplaneIcon className={`duration-100 text-slate-100 transition-all ${newMessage.length === 0 && !fileIsAttached ? 'h-0 w-0' : 'h-5 w-5'}`} />
+                    )}
+                  </button>
+                  {/* <button
+                  className="absolute left-4 bottom-2 p-0 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:hover:bg-neutral-200 dark:hover:rounded-full transition-all duration-200 dark:text-neutral-100 dark:hover:text-neutral-100"
+                  onClick={}
+                  onKeyDown={}
+                > */}
                   {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                   </svg> */}
-                </button>
+                  {/* </button> */}
+                </div>
+
+
+
+
               </div>
+              <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">            <a
+                href="https://github.com/iamgreggarcia/codesherpa"
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+              </a>
+                {' '}
 
-
-
-
-            </div>
-            <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">            <a
-              href="https://github.com/iamgreggarcia/codesherpa"
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-            </a>
-              {' '}
-
+              </div>
             </div>
           </div>
         </div>

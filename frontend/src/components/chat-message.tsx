@@ -61,8 +61,8 @@ const ChatMessage: React.FC<MessageProps> = ({ message }) => {
   return (
     <div
       className={`group md:px-4 ${message.role === 'user'
-        ? 'border-b border-black/10 bg-transparent text-#1e232a dark:border-gray-900/50 dark:bg-[#1e232a] dark:text-white'
-        : 'border-0 border-black/10 bg-slate-100 dark:border-gray-900/50 dark:bg-gray-700 dark:text-white'
+        ? 'border-b border-black/15 bg-transparent text-[#1e232a] dark:border-gray-900/50 dark:bg-[#1e232a] dark:text-white'
+        : 'border-0 border-black/15 bg-slate-100 dark:border-gray-900/50 dark:bg-gray-700 dark:text-white'
         }`}
       style={{ overflowWrap: 'anywhere' }}
     >
@@ -74,7 +74,7 @@ const ChatMessage: React.FC<MessageProps> = ({ message }) => {
         <div className=" mt-[-2px] w-full ">
           {message.content && (
             <MemoizedReactMarkdown
-              className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
+              className="dark:text-slate-200 prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
               remarkPlugins={[remarkGfm, remarkMath]}
               components={{
                 p({ children }) {
