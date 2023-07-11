@@ -21,15 +21,15 @@ WORKDIR /app
 
 COPY ./pyproject.toml ./poetry.lock* /app/
 
-RUN pip install poetry
+RUN pip install --no-cache-dir poetry
 
 # Create virtual environment and install dependencies
 RUN poetry config virtualenvs.in-project true && \
     poetry install --no-dev --no-root
 
-RUN /app/.venv/bin/pip install pytest pytest-cov pytest-asyncio
+RUN /app/.venv/bin/pip install --no-cache-dir pytest pytest-cov pytest-asyncio
 
-RUN /app/.venv/bin/pip install google-cloud-secret-manager 
+RUN /app/.venv/bin/pip install --no-cache-dir google-cloud-secret-manager 
 
 RUN mkdir -p /app/static/images
 
