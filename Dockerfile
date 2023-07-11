@@ -2,7 +2,7 @@
 FROM ubuntu:22.04
 
 # Update and install necessary compilers/interpreters
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
     python3.10 \
     python3-pip \
     g++ \
