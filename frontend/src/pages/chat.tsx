@@ -207,7 +207,7 @@ export default function Chat() {
 
       try {
         let assistantMessageContent = await fetchChat(chatHistory, abortController);
-
+        
         const functionCallIndex = assistantMessageContent.indexOf('{"function_call":');
         console.log('functionCallIndex: ', functionCallIndex)
         if (functionCallIndex !== -1) {
@@ -330,7 +330,7 @@ export default function Chat() {
           </div>
           <div className="mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto">
             <div className="flex-1 overflow-auto mt-12 mb-40 bg-transparent">
-              {messages.map((message, index) => message.role !== 'system' && <ChatMessage key={index} message={message} isStreaming={messageIsStreaming} streamingMessageIndex={messages.length - 1} currentMessageIndex={index} isFunctionCall={isFunctionCall} selectedModel={selectedModel} />)}
+              {messages.map((message, index) => message.role !== 'system' && <ChatMessage key={index} message={message} isStreaming={messageIsStreaming} streamingMessageIndex={messages.length - 1} currentMessageIndex={index} isFunctionCall={isFunctionCall} selectedModel={selectedModel} lastMessage={messages[messages.length - 2]}/>)}
               <div ref={messageEndRef} />
             </div>
           </div>
@@ -417,7 +417,7 @@ export default function Chat() {
                   </button>}
                 <button
                   type="submit"
-                  className={`absolute right-3 bottom-4 p-1 rounded-md text-neutral-800 opacity-90 ${newMessage.length === 0 ? 'bg-transparent text-neutral-800 opacity-60' : 'bg-fuchsia-500 text-neutral-100'} dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
+                  className={`absolute right-3 bottom-3.5 p-1 rounded-md text-neutral-800 opacity-90 ${newMessage.length === 0 ? 'bg-transparent text-neutral-800 opacity-60' : 'bg-fuchsia-500 text-neutral-100'} dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
                   onClick={handleSendMessage}
                   disabled={newMessage.length === 0 || messageIsStreaming}
                   hidden={messageIsStreaming}

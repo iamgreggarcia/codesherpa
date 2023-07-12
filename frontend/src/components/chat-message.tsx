@@ -12,11 +12,12 @@ type Message = components['schemas']['ChatCompletionRequestMessage'];
 
 type MessageProps = {
   message: Message;
+  isStreaming?: boolean;
+  lastMessage?: Message;
 };
 
 type AvatarProps = {
   role: string;
-  isStreaming?: boolean;
 };
 
 const Avatar: React.FC<AvatarProps> = ({ role }) => {
@@ -55,12 +56,13 @@ const Avatar: React.FC<AvatarProps> = ({ role }) => {
 type CollapsibleSectionProps = {
   title: string;
   children: React.ReactNode;
+  className?: string;
 };
 
-const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children }) => {
+const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="flex flex-col items-start">
+    <div className={`flex flex-col items-start ${className}`}>
       <div className="flex items-center text-xs rounded p-3 text-gray-900 bg-gray-100" onClick={() => setIsOpen(!isOpen)}>
         <div>{title}</div>
         <div className="ml-12 flex items-center gap-2" role="button">
@@ -75,11 +77,12 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children
   );
 };
 
+
 function checkContent(content: string) {
   return content.includes('{"function_call":') || content.includes('result:');
 }
 
-const ChatMessage: React.FC<MessageProps> = ({ message }) => {
+const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming }) => {
   return (
     <div
       className={`group md:px-4 ${message.role === 'user'
@@ -95,9 +98,10 @@ const ChatMessage: React.FC<MessageProps> = ({ message }) => {
         <div className=" mt-[-2px] w-full ">
           {message.content && (
             checkContent(message.content) ?
-              <CollapsibleSection title="Finished working">
+              <CollapsibleSection title="Function call">
+                <div className='bg-gray-400 h-5 pl-2 text-black text-sm text-left mr-7'>content</div>
                 <MemoizedReactMarkdown
-                  className="dark:text-slate-200 prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
+                  className="dark:text-slate-200 prose break-words bg-gray-950 p-4 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
                   remarkPlugins={[remarkGfm, remarkMath]}
                   components={{
                     p({ children }) {
