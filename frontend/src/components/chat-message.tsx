@@ -13,16 +13,18 @@ type Message = components['schemas']['ChatCompletionRequestMessage'];
 type MessageProps = {
   message: Message;
   isStreaming?: boolean;
-  lastMessage?: Message;
+  lastMessage: Message;
+  streamingMessageIndex?: number;
 };
 
 type AvatarProps = {
   role: string;
+  lastMessageRole: string;
 };
 
-const Avatar: React.FC<AvatarProps> = ({ role }) => {
+const Avatar: React.FC<AvatarProps> = ({ role, lastMessageRole }) => {
   const [darkMode, setDarkMode] = useState(false);
-
+  console.log(lastMessageRole)
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -82,7 +84,7 @@ function checkContent(content: string) {
   return content.includes('{"function_call":') || content.includes('result:');
 }
 
-const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming }) => {
+const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, streamingMessageIndex, lastMessage }) => {
   return (
     <div
       className={`group md:px-4 ${message.role === 'user'
@@ -93,15 +95,20 @@ const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming }) => {
     >
       <div className="relative m-auto flex p-4  md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
         <div className="min-w-[40px] text-right font-bold mr-5 sm:mr-4">
-          {message.role !== 'function' && <Avatar role={message.role} />}
+          {((message.role === 'user') ||
+            (message.role === 'assistant' && lastMessage.role === 'user') ||
+            (message.role === 'function' && lastMessage?.role === 'user')) &&
+            <Avatar role={message.role} lastMessageRole={lastMessage.role} />}
         </div>
+
+
         <div className=" mt-[-2px] w-full ">
           {message.content && (
             checkContent(message.content) ?
               <CollapsibleSection title="Function call">
-                <div className='bg-gray-400 h-5 pl-2 text-black text-sm text-left mr-7'>content</div>
+                {/* <div className='bg-gray-400 h-5 pl-2 text-black text-sm text-left mr-7'>content</div> */}
                 <MemoizedReactMarkdown
-                  className="dark:text-slate-200 prose break-words bg-gray-950 p-4 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
+                  className="dark:text-slate-200 prose break-words bg-gray-950 overflow-x-scroll p-4 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
                   remarkPlugins={[remarkGfm, remarkMath]}
                   components={{
                     p({ children }) {

@@ -153,7 +153,7 @@ export default function Chat() {
         } else {
           if (first) {
             first = false;
-            const assistantMessage: Message = { role: 'assistant', content: decodedValue ?? '' };
+            const assistantMessage: Message = { role: 'assistant', content: `\`\`\`${decodedValue}` ?? '' };
             setMessages(prevMessages => [...prevMessages, assistantMessage]);
 
           } else {
@@ -207,19 +207,14 @@ export default function Chat() {
 
       try {
         let assistantMessageContent = await fetchChat(chatHistory, abortController);
-        
+
         const functionCallIndex = assistantMessageContent.indexOf('{"function_call":');
-        console.log('functionCallIndex: ', functionCallIndex)
         if (functionCallIndex !== -1) {
           const functionCallStr = assistantMessageContent.slice(functionCallIndex);
-          console.log('functionCallStr: ', functionCallStr)
           const parsed = JSON.parse(functionCallStr);
-          console.log('parsed: ', parsed)
           let functionName = parsed.function_call.name
           let functionArgumentsStr = parsed.function_call.arguments;
 
-          console.log('function name: ', parsed.function_call.name);
-          console.log('function arguments: ', parsed.function_call.arguments);
           const requestBody = functionArgumentsStr;
           let endpoint = pathMap[functionName as keyof operations];
           if (!endpoint) {
@@ -236,13 +231,6 @@ export default function Chat() {
             });
 
             const parsedFunctionCallResponse = await pluginResponse.json();
-            // const stringifiedparsedFunctionCallResponse = JSON.stringify(parsedFunctionCallResponse);
-            // setMessages(prevMessages => {
-            //   const updatedMessages = [...prevMessages];
-            //   const lastMessage = updatedMessages[updatedMessages.length - 1];
-            //   lastMessage.content = `\n${stringifiedparsedFunctionCallResponse}`;
-            //   return updatedMessages;
-            // });
             console.log('parsedFunctionCallResponse: ', parsedFunctionCallResponse)
             console.log('parsedFunctionCallResponse.result: ', parsedFunctionCallResponse.result ?? '')
             const functionCallMessage: Message = { role: 'function', name: functionName, content: `result: ${parsedFunctionCallResponse.result}` ?? 'result: ok' };
@@ -264,7 +252,7 @@ export default function Chat() {
       setIsFunctionCall(false);
       setNewMessage('');
     },
-    [messages, newMessage, selectedModel, cancelStreamRef, uploadedFileUrl,uploadedFileName],
+    [messages, newMessage, selectedModel, cancelStreamRef, uploadedFileUrl, uploadedFileName],
   );
 
   const stopConversationHandler = () => {
@@ -330,9 +318,23 @@ export default function Chat() {
           </div>
           <div className="mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto">
             <div className="flex-1 overflow-auto mt-12 mb-40 bg-transparent">
-              {messages.map((message, index) => message.role !== 'system' && <ChatMessage key={index} message={message} isStreaming={messageIsStreaming} streamingMessageIndex={messages.length - 1} currentMessageIndex={index} isFunctionCall={isFunctionCall} selectedModel={selectedModel} lastMessage={messages[messages.length - 2]}/>)}
+              {messages.map((message, index) => {
+                const lastMessage = index > 0 ? messages[index - 1] : undefined;
+                return (
+                  message.role !== 'system' && (
+                    <ChatMessage
+                      key={index}
+                      message={message}
+                      isStreaming={messageIsStreaming}
+                      streamingMessageIndex={messages.length - 1}
+                      lastMessage={lastMessage}
+                    />
+                  )
+                );
+              })}
               <div ref={messageEndRef} />
             </div>
+
           </div>
         </div>
         <div className="fixed border-0 bottom-0 left-0 w-full dark:border-orange-200 bg-gradient-to-b from-transparent via-white to-white pt-6 dark:via-[#1f232a] dark:to-[#1f232a] md:pt-2">
