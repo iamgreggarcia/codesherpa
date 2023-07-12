@@ -319,7 +319,7 @@ export default function Chat() {
           <div className="mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto">
             <div className="flex-1 overflow-auto mt-12 mb-40 bg-transparent">
               {messages.map((message, index) => {
-                const lastMessage = index > 0 ? messages[index - 1] : undefined;
+                const lastMessage = index > 0 ? messages[index - 1] : 'na';
                 return (
                   message.role !== 'system' && (
                     <ChatMessage
@@ -327,7 +327,7 @@ export default function Chat() {
                       message={message}
                       isStreaming={messageIsStreaming}
                       streamingMessageIndex={messages.length - 1}
-                      lastMessage={lastMessage}
+                      lastMessage={lastMessage as Message}
                     />
                   )
                 );
