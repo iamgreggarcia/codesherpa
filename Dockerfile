@@ -2,7 +2,7 @@
 FROM ubuntu:22.04
 
 # Update and install necessary compilers/interpreters
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install --no-install-recommends -y \
     python3.10 \
     python3-pip \
     g++ \
@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     make \
     git \
     gnupg \
-    lsb-release
+    lsb-release && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create a symbolic link for Python
 RUN ln -s /usr/bin/python3.10 /usr/bin/python
@@ -20,15 +21,15 @@ WORKDIR /app
 
 COPY ./pyproject.toml ./poetry.lock* /app/
 
-RUN pip install poetry
+RUN pip install --no-cache-dir poetry
 
 # Create virtual environment and install dependencies
 RUN poetry config virtualenvs.in-project true && \
     poetry install --no-dev --no-root
 
-RUN /app/.venv/bin/pip install pytest pytest-cov pytest-asyncio
+RUN /app/.venv/bin/pip install --no-cache-dir pytest pytest-cov pytest-asyncio
 
-RUN /app/.venv/bin/pip install google-cloud-secret-manager 
+RUN /app/.venv/bin/pip install --no-cache-dir google-cloud-secret-manager 
 
 RUN mkdir -p /app/static/images
 
