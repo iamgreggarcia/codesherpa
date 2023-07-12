@@ -71,23 +71,23 @@ textarea:focus {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #3a3a3b;
   cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb-color);
+  background: #6e6d6d;
   border-radius: 10px;
   cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-color);
+  background: #6e6d6d;
   cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: var(--scrollbar-thumb-color);
+  background: #6e6d6d;
   cursor: pointer;
 }
 

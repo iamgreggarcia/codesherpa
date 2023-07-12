@@ -318,9 +318,8 @@ export default function Chat() {
   }, [messages, textareaRef.current]);
 
   return (
-
     <div className="relative h-screen mx-0">
-      <div className="flex flex-col h-screen p-6 mx-14">
+      <div className="flex flex-col h-screen p-6 mx-0">
         <div className={`absolute top-0 left-0 w-full border-transparent dark:border-white/20 dark:via-[#343541] dark:to-[#343541] 
         ${conversationStarted ? 'pt-0 md:pt-0' : 'pt-8 md:pt-6'}`}>
           <div className={`flex flex-row justify-center z-50 items-center pt-0 mx-0 md:mx-0 ${conversationStarted ? 'fixed' : ''}`}>
@@ -339,7 +338,7 @@ export default function Chat() {
               <div className="h-full flex ml-1 md:w-full md:m-auto md:mb-2 gap-0 md:gap-2 justify-center">
                 {messageIsStreaming ? (
                   <button
-                    className="hidden md:block btn relative btn-neutral -z-0 border-0 md:border"
+                    className="dark:bg-gray-800 bg-white text-black dark:text-gray-100 dark:hover:bg-gray-900 hover:bg-gray-200  hidden md:block btn relative btn-neutral -z-0 border-0 md:border"
                     onClick={stopConversationHandler}
                   >
                     <div className="flex w-full gap-2 items-center justify-center">
@@ -349,11 +348,13 @@ export default function Chat() {
                   </button>
                 ) : conversationStarted ? (
                   <button
-                    className="hidden md:block btn relative btn-neutral -z-0 border-0 md:border"
+                    className="dark:bg-gray-800 bg-white text-black dark:text-gray-100 dark:hover:bg-gray-900 hover:bg-gray-200 hidden md:block btn relative btn-neutral -z-0 border-0 md:border"
                     onClick={regenerateResponseHandler}
                   >
                     <div className="flex w-full gap-2 items-center justify-center">
-                      {/* ... SVG for Regenerate Response ... */}
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                      </svg>
                       Regenerate Response
                     </div>
                   </button>
@@ -418,7 +419,7 @@ export default function Chat() {
                 >
                   <PaperAirplaneIcon className={`duration-100 text-slate-100 transition-all ${newMessage.length === 0 && !fileIsAttached ? 'h-0 w-0' : 'h-5 w-5'}`} />
                 </button>
-                {!messageIsStreaming && <span className="absolute right-3 bottom-4 loading loading-bars loading-md text-fuchsia-600"></span>
+                {messageIsStreaming && <span className="absolute right-3 bottom-4 loading loading-bars loading-md text-fuchsia-600"></span>
                 }
                 {/* <button
                   className="absolute left-4 bottom-2 p-0 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:hover:bg-opacity-20 dark:hover:bg-neutral-200 dark:hover:rounded-full transition-all duration-200 dark:text-neutral-100 dark:hover:text-neutral-100"
@@ -435,7 +436,7 @@ export default function Chat() {
 
 
             </div>
-            <div className="hidden md:block px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">            <a
+            {/* <div className="hidden md:block px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">            <a
               href="https://github.com/iamgreggarcia/codesherpa"
               target="_blank"
               rel="noreferrer"
@@ -444,11 +445,10 @@ export default function Chat() {
             </a>
               {' '}
 
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
     </div>
-
   );
 }
