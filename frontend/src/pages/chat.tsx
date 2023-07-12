@@ -188,7 +188,6 @@ export default function Chat() {
 
         const newUserMessage: Message = { role: 'user', content: newMessage ?? '' };
         setNewMessage('');
-        setFileIsAttached(false);
         setMessages(prevMessages => [...prevMessages, newUserMessage]);
 
         if (textareaRef.current) {
@@ -197,6 +196,10 @@ export default function Chat() {
 
         if (uploadedFileUrl) {
           newUserMessage.content += `\n\(Uploaded file: ${uploadedFileName})`;
+          setFileIsAttached(false);
+          setUploadedFileUrl(null);
+          setUploadedFileName(null);
+          setFileIsAttached(false);
         }
         chatHistory = [...messages, newUserMessage];
       }
@@ -261,7 +264,7 @@ export default function Chat() {
       setIsFunctionCall(false);
       setNewMessage('');
     },
-    [messages, newMessage, selectedModel, cancelStreamRef, uploadedFileUrl],
+    [messages, newMessage, selectedModel, cancelStreamRef, uploadedFileUrl,uploadedFileName],
   );
 
   const stopConversationHandler = () => {

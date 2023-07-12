@@ -12,6 +12,7 @@ type Message = components['schemas']['ChatCompletionRequestMessage'];
 
 type MessageProps = {
   message: Message;
+  isStreaming?: boolean;
 };
 
 type AvatarProps = {
@@ -52,34 +53,12 @@ const Avatar: React.FC<AvatarProps> = ({ role }) => {
   }
 };
 
-type CollapsibleSectionProps = {
-  title: string;
-  children: React.ReactNode;
-};
-
-const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="flex flex-col items-start">
-      <div className="flex items-center text-xs rounded p-3 text-gray-900 bg-gray-100" onClick={() => setIsOpen(!isOpen)}>
-        <div>{title}</div>
-        <div className="ml-12 flex items-center gap-2" role="button">
-          <div className="text-xs text-gray-600">{isOpen ? 'Hide work' : 'Show work'}</div>
-          <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" className="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
-            <polyline points={isOpen ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
-          </svg>
-        </div>
-      </div>
-      {isOpen && <div className="mt-3 self-stretch">{children}</div>}
-    </div>
-  );
-};
 
 function checkContent(content: string) {
   return content.includes('{"function_call":') || content.includes('result:');
 }
+const ChatMessage: React.FC<MessageProps> = ({ message }: MessageProps) => {
 
-const ChatMessage: React.FC<MessageProps> = ({ message }) => {
   return (
     <div
       className={`group md:px-4 ${message.role === 'user'
@@ -92,53 +71,10 @@ const ChatMessage: React.FC<MessageProps> = ({ message }) => {
         <div className="min-w-[40px] text-right font-bold mr-5 sm:mr-4">
           {message.role !== 'function' && <Avatar role={message.role} />}
         </div>
+
         <div className=" mt-[-2px] w-full ">
           {message.content && (
-            checkContent(message.content) ?
-              <CollapsibleSection title="Finished working">
-                <MemoizedReactMarkdown
-                  className="dark:text-slate-200 prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  components={{
-                    p({ children }) {
-                      return <p className="mb-2 last:mb-0">{children}</p>
-                    },
-                    code({ node, inline, className, children, ...props }) {
-                      if (children.length) {
-                        if (children[0] == '▍') {
-                          return (
-                            <span className="mt-1 animate-pulse cursor-default">▍</span>
-                          )
-                        }
-
-                        children[0] = (children[0] as string).replace('`▍`', '▍')
-                      }
-
-                      const match = /language-(\w+)/.exec(className || '')
-
-                      if (inline) {
-                        return (
-                          <code className={className} {...props}>
-                            {children}
-                          </code>
-                        )
-                      }
-
-                      return (
-                        <CodeBlock
-                          key={Math.random()}
-                          language={(match && match[1]) || ''}
-                          value={String(children).replace(/\n$/, '')}
-                          {...props}
-                        />
-                      )
-                    }
-                  }}
-                >
-                  {message.content}
-                </MemoizedReactMarkdown>
-              </CollapsibleSection>
-              :
+            checkContent(message.content) ? (
               <MemoizedReactMarkdown
                 className="dark:text-slate-200 prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
                 remarkPlugins={[remarkGfm, remarkMath]}
@@ -180,11 +116,52 @@ const ChatMessage: React.FC<MessageProps> = ({ message }) => {
               >
                 {message.content}
               </MemoizedReactMarkdown>
-          )}
+            ) : (
+              <MemoizedReactMarkdown
+                className="dark:text-slate-200 prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
+                remarkPlugins={[remarkGfm, remarkMath]}
+                components={{
+                  p({ children }) {
+                    return <p className="mb-2 last:mb-0">{children}</p>
+                  },
+                  code({ node, inline, className, children, ...props }) {
+                    if (children.length) {
+                      if (children[0] == '▍') {
+                        return (
+                          <span className="mt-1 animate-pulse cursor-default">▍</span>
+                        )
+                      }
+
+                      children[0] = (children[0] as string).replace('`▍`', '▍')
+                    }
+
+                    const match = /language-(\w+)/.exec(className || '')
+
+                    if (inline) {
+                      return (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      )
+                    }
+
+                    return (
+                      <CodeBlock
+                        key={Math.random()}
+                        language={(match && match[1]) || ''}
+                        value={String(children).replace(/\n$/, '')}
+                        {...props}
+                      />
+                    )
+                  }
+                }}
+              >
+                {message.content}
+              </MemoizedReactMarkdown>
+            ))}
         </div>
+
       </div>
     </div>
   );
-};
-
-export default ChatMessage;
+}
