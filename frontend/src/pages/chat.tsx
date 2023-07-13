@@ -252,7 +252,7 @@ export default function Chat() {
       setIsFunctionCall(false);
       setNewMessage('');
     },
-    [messages, newMessage, selectedModel, cancelStreamRef, uploadedFileUrl, uploadedFileName],
+    [messages, newMessage, selectedModel, cancelStreamRef, uploadedFileUrl, uploadedFileName, messageIsStreaming],
   );
 
   const stopConversationHandler = () => {
@@ -265,6 +265,7 @@ export default function Chat() {
   };
 
   const regenerateResponseHandler = async () => {
+    setMessageIsStreaming(true);
     const lastUserMessageIndex = messages.reduce((lastIndex, message, index) => {
       return message.role === 'user' ? index : lastIndex;
     }, -1);
