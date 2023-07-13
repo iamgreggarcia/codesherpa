@@ -327,6 +327,7 @@ export default function Chat() {
                       message={message}
                       isStreaming={messageIsStreaming}
                       streamingMessageIndex={messages.length - 1}
+                      isCurrentMessage={index === messages.length - 1}
                       lastMessage={lastMessage as Message}
                     />
                   )

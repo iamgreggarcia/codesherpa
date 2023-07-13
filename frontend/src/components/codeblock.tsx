@@ -5,6 +5,8 @@ import { coldarkDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 interface Props {
   language: string
   value: string
+  isStreaming?: boolean
+  isCurrentMessage?: boolean
 }
 
 interface languageMap {
@@ -47,7 +49,7 @@ export const generateRandomString = (length: number, lowercase = false) => {
   return lowercase ? result.toLowerCase() : result
 }
 
-const CodeBlock: FC<Props> = memo(({ language, value }) => {
+const CodeBlock: FC<Props> = memo(({ language, value, isStreaming, isCurrentMessage }) => {
 
   return (
     <div className="codeblock relative w-full bg-zinc-950 font-sans shadow-lg">

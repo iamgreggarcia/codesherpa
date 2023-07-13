@@ -15,6 +15,7 @@ type MessageProps = {
   isStreaming?: boolean;
   lastMessage: Message;
   streamingMessageIndex?: number;
+  isCurrentMessage: boolean;
 };
 
 type AvatarProps = {
@@ -84,7 +85,13 @@ function checkContent(content: string) {
   return content.includes('{"function_call":') || content.includes('result:');
 }
 
-const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, streamingMessageIndex, lastMessage }) => {
+const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, isCurrentMessage, streamingMessageIndex, lastMessage }) => {
+  let content = message.content;
+  if (isStreaming && isCurrentMessage && message.role !== 'user') {
+    // Append the cursor character at the end of the streaming text
+    content += '▍';
+  }
+
   return (
     <div
       className={`group md:px-4 ${message.role === 'user'
@@ -102,9 +109,9 @@ const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, streamingMe
         </div>
 
 
-        <div className=" mt-[-2px] w-full ">
-          {message.content && (
-            checkContent(message.content) ?
+        <div className=" mt-[-2px] w-full">
+          {content && (
+            checkContent(content) ?
               <CollapsibleSection title="Function call">
                 {/* <div className='bg-gray-400 h-5 pl-2 text-black text-sm text-left mr-7'>content</div> */}
                 <MemoizedReactMarkdown
@@ -136,18 +143,23 @@ const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, streamingMe
                       }
 
                       return (
-                        <CodeBlock
-                          key={Math.random()}
-                          language={(match && match[1]) || ''}
-                          value={String(children).replace(/\n$/, '')}
-                          {...props}
-                        />
+                        <>
+                          <CodeBlock
+                            key={Math.random()}
+                            language={(match && match[1]) || ''}
+                            value={String(children).replace(/\n$/, '')}
+                            isCurrentMessage={isCurrentMessage}
+                            isStreaming={isStreaming}
+                            {...props}
+                          />
+                        </>
                       )
                     }
                   }}
                 >
-                  {message.content}
-                </MemoizedReactMarkdown>
+                  {content}
+
+                </MemoizedReactMarkdown >
               </CollapsibleSection>
               :
               <MemoizedReactMarkdown
@@ -179,17 +191,21 @@ const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, streamingMe
                     }
 
                     return (
-                      <CodeBlock
-                        key={Math.random()}
-                        language={(match && match[1]) || ''}
-                        value={String(children).replace(/\n$/, '')}
-                        {...props}
-                      />
+                      <>
+                        <CodeBlock
+                          key={Math.random()}
+                          language={(match && match[1]) || ''}
+                          value={String(children).replace(/\n$/, '')}
+                          isCurrentMessage={isCurrentMessage}
+                          isStreaming={isStreaming}
+                          {...props}
+                        />
+                      </>
                     )
                   }
                 }}
               >
-                {message.content}
+                {content}
               </MemoizedReactMarkdown>
           )}
         </div>
