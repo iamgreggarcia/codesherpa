@@ -18,7 +18,7 @@ export function parseOpenAIStreamData(data: string): string {
     
     for (const event of events) {
         // Trim the prefix to get the data part
-        console.log(event)
+        // console.log(event)
         let trimmedEvent = event.trim().substring(dataPrefix.length);
 
         if (trimmedEvent === "[DONE]") {

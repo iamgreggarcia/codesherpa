@@ -20,6 +20,7 @@
   :root {
     --background-start-rgb: 241, 245, 249;
     --background-end-rgb: 241, 245, 249;
+    --scrollbar-thumb-color: #6e6d6d;
   }
 }
 
@@ -66,23 +67,28 @@ textarea:focus {
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
+  cursor: pointer;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #3a3a3b;
+  cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.26);
+  background: #6e6d6d;
   border-radius: 10px;
+  cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(230, 225, 225, 0.4);
+  background: #6e6d6d;
+  cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: rgba(181, 179, 179, 0.9);
+  background: #6e6d6d;
+  cursor: pointer;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap');
@@ -106,4 +112,15 @@ textarea:focus {
   100% {
     opacity: 1;
   }
+}
+
+/* Blinking cursor */
+@keyframes blink {
+  0% {opacity: 1;}
+  50% {opacity: 0;}
+  100% {opacity: 1;}
+}
+
+.cursor-blink {
+  animation: blink 1s linear infinite;
 }

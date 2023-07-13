@@ -18,7 +18,7 @@ test:
 	docker run --rm codesherpa pytest tests/
 
 run-frontend:
-	cd frontend && pnpm dev &
+	cd frontend && pnpm dev
 
 run:
 	cd frontend && pnpm dev &

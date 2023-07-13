@@ -1,3 +1,4 @@
+// src/components/markdown.tsx
 import { FC, memo } from 'react'
 import ReactMarkdown, { Options } from 'react-markdown'
 

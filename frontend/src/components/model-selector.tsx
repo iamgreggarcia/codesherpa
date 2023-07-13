@@ -17,6 +17,26 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, setSelecte
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedModelSVG, setSelectedModelSVG] = useState<React.ReactNode | null>(null);
   let timeoutId: NodeJS.Timeout;
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  let lastScrollTop = 0;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const st = window.pageYOffset || document.documentElement.scrollTop;
+      if (st > lastScrollTop) {
+        setScrollDirection('down');
+      } else {
+        setScrollDirection('up');
+      }
+      lastScrollTop = st <= 0 ? 0 : st;
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const baseModel = Object.values(OpenAIBaseModel).find(base => selectedModel.startsWith(base));
@@ -54,7 +74,9 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, setSelecte
 
   if (conversationStarted) {
     return (
-      <div className="top-0 flex flex-wrap w-screen items-center justify-center gap-1 border-b border-black/10 bg-gray-50 py-1 px-0 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300">{modelToSVG(selectedModel, true)} Model: {selectedModel}</div>
+      <div className={`top-0 flex flex-wrap w-screen items-center justify-center gap-1 border-b border-black/10 bg-gray-50 py-1 px-0 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300 duration-300 transform transition-transform ${scrollDirection === 'down' ? '-translate-y-full' : ''}`}>
+        {modelToSVG(selectedModel, true)} Model: {selectedModel}
+      </div>
     );
   } else {
     return (
