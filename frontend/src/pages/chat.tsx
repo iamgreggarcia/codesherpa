@@ -112,6 +112,7 @@ export default function Chat() {
 
     if (reader) {
       while (!done) {
+        setMessageIsStreaming(true);
         if (cancelStreamRef.current === true) {
           abortController.abort();
           done = true;
@@ -166,6 +167,7 @@ export default function Chat() {
           }
         }
       }
+      setMessageIsStreaming(false);
     }
 
     return assistantMessageContent;
@@ -211,6 +213,7 @@ export default function Chat() {
         const functionCallIndex = assistantMessageContent.indexOf('{"function_call":');
         if (functionCallIndex !== -1) {
           const functionCallStr = assistantMessageContent.slice(functionCallIndex);
+          console.log('functionCallStr: ', functionCallStr  )
           const parsed = JSON.parse(functionCallStr);
           let functionName = parsed.function_call.name
           let functionArgumentsStr = parsed.function_call.arguments;
@@ -421,9 +424,9 @@ export default function Chat() {
                   </button>}
                 <button
                   type="submit"
-                  className={`absolute right-3 bottom-3.5 p-1 rounded-md text-neutral-800 opacity-90 ${newMessage.length === 0 ? 'bg-transparent text-neutral-800 opacity-60' : 'bg-fuchsia-500 text-neutral-100'} dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
+                  className={`absolute right-3 bottom-3.5 p-1 rounded-md text-neutral-800 opacity-90 ${newMessage.length === 0 && !fileIsAttached ? 'bg-transparent text-neutral-800 opacity-60' : 'bg-fuchsia-500 text-neutral-100'} dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-900 duration-100 transition-all`}
                   onClick={handleSendMessage}
-                  disabled={newMessage.length === 0 || messageIsStreaming}
+                  disabled={newMessage.length === 0 && !fileIsAttached || messageIsStreaming}
                   hidden={messageIsStreaming}
                 >
                   <PaperAirplaneIcon className={`duration-100 text-slate-100 transition-all ${newMessage.length === 0 && !fileIsAttached ? 'h-0 w-0' : 'h-5 w-5'}`} />

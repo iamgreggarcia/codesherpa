@@ -1,30 +1,87 @@
-# CodeSherpa
+# codesherpa
 
-CodeSherpa is a code interpreter ChatGPT plugin. It's designed to execute code and run commands locally in a Docker container. Read the [Quickstart section](#quickstart) to try it out.
+**codesherpa** is both a code interpreter **ChatGPT plugin** anda a **standalone** code interpreter (_**experimental**_). Read the [Quickstart section](#quickstart) to try it out.
 
-### Disclaimer
+### You can use it as a: 
 
-#### 🚨 Allowing ChatGPT to execute code could be dangerous. 
-First and foremost, beware the perils of code execution. While this ChatGPT plugin can be delightfully playful and curious, akin to a newborn puppy exploring its world, this endearing trait also implies it might chew on your favorite slippers—or worse, execute code that wasn't meant to be run. **Always run the plugin in a Docker container, not on your host machine.**
+- code interpreter plugin with ChatGPT
+  - API for ChatGPT to run and execute code with file persistance and no timeout 
+- standalone code interpreter (_**experimental**_). 
+  - Using OpenAI's [GPT function calling](https://platform.openai.com/docs/guides/gpt/function-calling), I've tried to recreate the experience of the ChatGPT Code Interpreter by using `functions`. For many reasons, there is a significant difference between this implementation and the ChatGPT Code Interpreter created by OpenAI. It's still very buggy and inconsistent, but I wanted to put it out there in the world anyone interested.
 
-Here's a highlight reel demonstrating what you can do.. See more [examples here](#examples)
 
+Standalone code interpreter demo:
+
+// add demo
+
+ChatGPT Plugin demo:
 
 https://github.com/iamgreggarcia/codesherpa/assets/16596972/b7afb034-6b74-42a3-9496-a912bcaf0f66
 
 
+See more [examples here](#examples)
 
 
 ## Recent Updates
+
+- **July 13, 2023**: 
+  - A basic standalone UI is now available. Read the [Quickstart section](#quickstart) to try it (requires an OpenAI API key). _NOTE_: expect **many** bugs and shortcomings, especially if you've been binging OpenAI's Code Interpreter since its been made general available to Plus subscribers
+  - New contributions from [emsi](https://github.com/emsi) [(#18)]([Title](https://github.com/iamgreggarcia/codesherpa/pull/18)) and [PeterDaveHello](https://github.com/PeterDaveHello) [(#28)](https://github.com/iamgreggarcia/codesherpa/pull/28)! 👏
 - **June 21, 2023**: 
-    - The ChatGPT plugin servic will now fetch the `openapi.json` generated be the server. Also added [request example data](https://fastapi.tiangolo.com/tutorial/schema-extra-example/) which is included in the api spec. This reduces the size of the plugin manifest `description_for_model`.
+    - The ChatGPT plugin service will now fetch the `openapi.json` generated be the server. Also added [request example data](https://fastapi.tiangolo.com/tutorial/schema-extra-example/) which is included in the api spec. This reduces the size of the plugin manifest `description_for_model`.
     - Updated the README section on future work. 
+<details>
+<summary>Previous Updates</summary>
+
 - **June 18, 2023**: Added `docker-compose.yml`
 - **May 31, 2023**: Introduced new file upload interface via `upload.html` and corresponding server endpoint, allowing you to upload files at `localhost:3333/upload` or by telling ChatGPT you want to upload a file or have a file you want to work with: ![upload-demo](https://github.com/iamgreggarcia/codesherpa/assets/16596972/bb1bcadf-7152-44fb-becb-f571094cbf56) Refactored Python code execution using `ast` module for enhanced efficiency. Local server and manifest file updates to support these features. Minor updates to REPL execution, error handling, and code formatting.
-- **May 22, 2023**: Refactored README to provide clear and concise instructions for building and running CodeSherpa.
-- **May 20, 2023**: CodeSherpa now supports multiple programming languages, including Python, C++, and Rust.
+- **May 22, 2023**: Refactored README to provide clear and concise instructions for building and running codesherpa.
+- **May 20, 2023**: codesherpa now supports multiple programming languages, including Python, C++, and Rust.
+
+</details>
 
 ## Quickstart
+
+### NEW: Standalone code interpreter (experimental)
+
+To try the new chat interface:
+
+```bash
+# Clone the repository
+git clone https://github.com/iamgreggarcia/codesherpa.git
+```
+
+Install dependencies and startup the Next.js app:
+```bash
+cd codesherpa/frontend
+pnpm install
+pnpm dev
+```
+OR
+
+```bash
+cd codesherpa/frontend
+npm install
+npm run dev
+```
+Download the docker image OR run the codesherpa API locally (beware!):
+
+Docker image:
+```bash
+# Pull the Docker image
+docker pull ghcr.io/iamgreggarcia/codesherpa:latest
+
+# Run the Docker image locally
+docker compose up
+```
+
+Run the server locally (potentially risky!):
+```bash
+cd codesherpa
+make dev
+```
+
+Navigate to `http://localhost:3000`. Expect bugs and inconsistencies.
 
 ### Prerequisites
 
@@ -40,9 +97,9 @@ Ensure the following software is installed on your system:
       - [Mac](https://docs.docker.com/desktop/install/mac-install/)
       - [Windows](https://docs.docker.com/desktop/install/windows-install/)
 
-### Installation and Running CodeSherpa
+### Installation and Running codesherpa as a ChatGPT Plugin
 
-Here are the steps to get CodeSherpa up and running swiftly:
+Here are the steps to get codesherpa up and running swiftly:
 
 **Option 1: Using Docker image from Github Packages**
 
@@ -92,13 +149,13 @@ docker run -p 3333:3333 codesherpa python3 -c "import localserver.main; localser
 docker compose up
 ```
 
-Whichever option you choose, CodeSherpa will be accessible at [localhost:3333](http://localhost:3333).
+Whichever option you choose, codesherpa will be accessible at [localhost:3333](http://localhost:3333).
 
-### Connecting CodeSherpa to ChatGPT
+### Connecting codesherpa to ChatGPT
 
 1. Navigate to the ChatGPT UI, and access the plugin store.
 2. Select "Develop your own plugin".
-3. In the plugin URL input, enter `localhost:3333`. Your ChatGPT should now be able to use CodeSherpa's features.
+3. In the plugin URL input, enter `localhost:3333`. Your ChatGPT should now be able to use codesherpa's features.
 
 
 ## Examples
@@ -125,22 +182,11 @@ https://github.com/iamgreggarcia/codesherpa/assets/16596972/5e9a3b6a-b004-434b-a
 
 
 ## Future Work
-
-### Standalone Code Interpreter
-The new [`functions`](https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions) parameter in the latest GPT models (`gpt-4-0613`, `gpt-3.5-turbo-16k-0613`, and `gpt-4-32k-0613` which I don't have access to 🙄) effectively unlocks the capability to build your own "plugin service", similar to ChatGPT Plugins.
-
-As such, I want to make a standalone version of **codesherpa** that doesn't require plugin developer access, loggin into ChatGPT, etc., only an API. 
-
-I've already translated the `openapi.json` spec into a `functions` parameter for the relevant endpoints using a simple tool called **[Func-it](https://github.com/iamgreggarcia/funcit)**
-
-
- It transforms your openapi spec into a drop-in ready functions parameter in a programming language of your choice. I suspect OpenAI does something similar during the plugin registration flow, converting openapi specs into functions that the model can call. 
-
-Next steps:
-1. Create the frontend, which I'll most likely do using Vercel's AI sdk or their chat template
-2. Configure an agent, using [this notebook](https://github.com/openai/openai-cookbook/blob/0d1436b8d9b858c220d708a446a09eef54be61b0/examples/How_to_call_functions_for_knowledge_retrieval.ipynb) in the OpenAI Cookbook
-
-Stay tuned!
+- Improve the UI (maybe). The UI needs a lot of love:
+  - multi-conversation support
+  - previous message editing
+  - granular control over parameters
+  - consistent function call rendering
 
 ## Contributing
 

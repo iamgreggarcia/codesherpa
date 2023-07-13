@@ -25,7 +25,6 @@ type AvatarProps = {
 
 const Avatar: React.FC<AvatarProps> = ({ role, lastMessageRole }) => {
   const [darkMode, setDarkMode] = useState(false);
-  console.log(lastMessageRole)
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 

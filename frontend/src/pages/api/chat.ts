@@ -14,7 +14,7 @@ const handler = async (req: Request): Promise<Response> => {
   const { messages, model, signal } = await req.json();
   const function_call = 'auto';
   const max_tokens = Infinity;
-  const temperature = 0.8;
+  const temperature = 0.3;
   const stream = true;
 
   try {
