@@ -7,7 +7,7 @@
 - code interpreter plugin with ChatGPT
   - API for ChatGPT to run and execute code with file persistance and no timeout 
 - standalone code interpreter (_**experimental**_). 
-  - Using OpenAI's [GPT function calling](https://platform.openai.com/docs/guides/gpt/function-calling), I've tried to recreate the experience of the ChatGPT Code Interpreter by using `functions`. For many reasons, there is a significant difference between this implementation and the ChatGPT Code Interpreter created by OpenAI. It's still very buggy and inconsistent, but I wanted to put it out there in the world anyone interested.
+  - Using OpenAI's [GPT function calling](https://platform.openai.com/docs/guides/gpt/function-calling), I've tried to recreate the experience of the ChatGPT Code Interpreter by using `functions`. For many reasons, there is a significant difference between this implementation and the ChatGPT Code Interpreter created by OpenAI. It's still very buggy and inconsistent, but I wanted to release it for those interested.
 
 
 Standalone code interpreter demo:
