@@ -50,17 +50,20 @@ To try the new chat interface:
 # Clone the repository
 git clone https://github.com/iamgreggarcia/codesherpa.git
 ```
+Add your `OPENAI_API_KEY` to a copy of `.env.example`:
+```bash
+cd codesherpa/frontend
+cp .env.example .env.local
+```
 
 Install dependencies and startup the Next.js app:
 ```bash
-cd codesherpa/frontend
 pnpm install
 pnpm dev
 ```
 OR
 
 ```bash
-cd codesherpa/frontend
 npm install
 npm run dev
 ```
@@ -83,6 +86,8 @@ make dev
 
 Navigate to `http://localhost:3000`. Expect bugs and inconsistencies.
 
+### Installation and Running codesherpa as a ChatGPT Plugin
+
 ### Prerequisites
 
 Ensure the following software is installed on your system:
@@ -97,9 +102,6 @@ Ensure the following software is installed on your system:
       - [Mac](https://docs.docker.com/desktop/install/mac-install/)
       - [Windows](https://docs.docker.com/desktop/install/windows-install/)
 
-### Installation and Running codesherpa as a ChatGPT Plugin
-
-Here are the steps to get codesherpa up and running swiftly:
 
 **Option 1: Using Docker image from Github Packages**
 
