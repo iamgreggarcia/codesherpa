@@ -208,6 +208,10 @@ Steps to contribute:
 4. Push to the branch `git push origin feature/YourAmazingIdea`.
 5. Submit a Pull Request.
 
+## Disclaimer
+
+**codesherpa** is independently developed and not affiliated, endorsed, or sponsored by OpenAI. 
+
 ## License
 
 This project is licensed under the terms of the MIT license.
