@@ -1,8 +1,8 @@
 # codesherpa
 
-**codesherpa** is both a code interpreter **ChatGPT plugin** anda a **standalone** code interpreter (_**experimental**_). Read the [Quickstart section](#quickstart) to try it out.
+**codesherpa** is a code interpreter **ChatGPT plugin** and a **standalone** code interpreter (_**experimental**_). Read the [Quickstart section](#quickstart) to try it out.
 
-### You can use it as a: 
+### You can use it as a
 
 - code interpreter plugin with ChatGPT
   - API for ChatGPT to run and execute code with file persistance and no timeout 
@@ -12,7 +12,13 @@
 
 Standalone code interpreter demo:
 
-// add demo
+
+
+https://github.com/iamgreggarcia/codesherpa/assets/16596972/96cb0694-fec6-4046-99d6-2e141b2a853f
+
+
+
+
 
 ChatGPT Plugin demo:
 
@@ -25,7 +31,7 @@ See more [examples here](#examples)
 ## Recent Updates
 
 - **July 13, 2023**: 
-  - A basic standalone UI is now available. Read the [Quickstart section](#quickstart) to try it (requires an OpenAI API key). _NOTE_: expect **many** bugs and shortcomings, especially if you've been binging OpenAI's Code Interpreter since its been made general available to Plus subscribers
+  - A basic standalone UI is now available. Read the [Quickstart section](#quickstart) to try it (requires an OpenAI API key). _NOTE_: expect **many** bugs and shortcomings, especially if you've been binging OpenAI's Code Interpreter since its been made generally available to Plus subscribers
   - New contributions from [emsi](https://github.com/emsi) [(#18)]([Title](https://github.com/iamgreggarcia/codesherpa/pull/18)) and [PeterDaveHello](https://github.com/PeterDaveHello) [(#28)](https://github.com/iamgreggarcia/codesherpa/pull/28)! 👏
 - **June 21, 2023**: 
     - The ChatGPT plugin service will now fetch the `openapi.json` generated be the server. Also added [request example data](https://fastapi.tiangolo.com/tutorial/schema-extra-example/) which is included in the api spec. This reduces the size of the plugin manifest `description_for_model`.
