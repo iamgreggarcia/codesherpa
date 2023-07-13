@@ -60,17 +60,20 @@ type CollapsibleSectionProps = {
   title: string;
   children: React.ReactNode;
   className?: string;
+  isStreaming?: boolean;
+  isCurrentMessage?: boolean;
 };
 
-const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, className = "" }) => {
+const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({ title, children, className = "", isStreaming, isCurrentMessage }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className={`flex flex-col items-start ${className}`}>
       <div className="flex items-center text-xs rounded p-3 text-gray-900 bg-gray-100" onClick={() => setIsOpen(!isOpen)}>
+        <span className={`text-secondary mr-2 ${isStreaming && isCurrentMessage ? 'loading loading-spinner loading-sm' : 'hidden'}`} style={{ width: '1.5rem' }}></span>
         <div>{title}</div>
         <div className="ml-12 flex items-center gap-2" role="button">
           <div className="text-xs text-gray-600">{isOpen ? 'Hide work' : 'Show work'}</div>
-          <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" className="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+          <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
             <polyline points={isOpen ? "18 15 12 9 6 15" : "6 9 12 15 18 9"}></polyline>
           </svg>
         </div>
@@ -112,7 +115,7 @@ const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, isCurrentMe
         <div className=" mt-[-2px] w-full">
           {content && (
             checkContent(content) ?
-              <CollapsibleSection title="Function call">
+              <CollapsibleSection title="Function call" isStreaming={isStreaming} isCurrentMessage={isCurrentMessage} >
                 {/* <div className='bg-gray-400 h-5 pl-2 text-black text-sm text-left mr-7'>content</div> */}
                 <MemoizedReactMarkdown
                   className="dark:text-slate-200 prose break-words bg-gray-950 overflow-x-scroll p-4 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
