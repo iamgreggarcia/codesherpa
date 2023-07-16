@@ -113,6 +113,8 @@ const ChatMessage: React.FC<MessageProps> = ({ message, isStreaming, isCurrentMe
         : 'border-0 border-black/15 bg-slate-100 dark:border-gray-900/50 dark:bg-gray-700 dark:text-white'
         }`}
       style={{ overflowWrap: 'anywhere' }}
+      onMouseEnter={() => setHoveredMessageIndex(messageIndex)}
+      onMouseLeave={() => setHoveredMessageIndex(null)}
     >
       <div className="relative m-auto flex p-4  md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
         <div className="min-w-[40px] text-right font-bold mr-5 sm:mr-4">
