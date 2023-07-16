@@ -25,6 +25,7 @@ export default function Chat() {
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [fileIsAttached, setFileIsAttached] = useState<boolean>(false);
   const [resubmitLastMessage, setResubmitLastMessage] = useState(false);
+  const [hoveredMessageIndex, setHoveredMessageIndex] = useState<number | null>(null);
 
   const isMobile = () => {
     const userAgent =
@@ -213,7 +214,7 @@ export default function Chat() {
         const functionCallIndex = assistantMessageContent.indexOf('{"function_call":');
         if (functionCallIndex !== -1) {
           const functionCallStr = assistantMessageContent.slice(functionCallIndex);
-          console.log('functionCallStr: ', functionCallStr  )
+          console.log('functionCallStr: ', functionCallStr)
           const parsed = JSON.parse(functionCallStr);
           let functionName = parsed.function_call.name
           let functionArgumentsStr = parsed.function_call.arguments;
@@ -333,6 +334,9 @@ export default function Chat() {
                       streamingMessageIndex={messages.length - 1}
                       isCurrentMessage={index === messages.length - 1}
                       lastMessage={lastMessage as Message}
+                      messageIndex={index}
+                      hoveredMessageIndex={hoveredMessageIndex}
+                      setHoveredMessageIndex={setHoveredMessageIndex}
                     />
                   )
                 );
