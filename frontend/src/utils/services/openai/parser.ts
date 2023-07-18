@@ -29,7 +29,7 @@ export function parseOpenAIStreamData(data: string): string {
         try {
             // Parse the JSON data
             const jsonData: StreamResponse = JSON.parse(trimmedEvent);
-
+            // credit: https://github.com/vercel-labs/ai/blob/main/packages/core/streams/openai-stream.ts
             if (jsonData.choices[0]?.delta?.function_call?.name) {
                 isFirst = true;
                 //console.log(`{"function_call": {"name": "${jsonData.choices[0]?.delta?.function_call.name}", "arguments": "`)
