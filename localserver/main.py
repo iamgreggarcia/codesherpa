@@ -174,7 +174,7 @@ async def delete_file(fileName: str):
 @app.post("/repl", response_model=CodeExecutionResponse)
 def repl(request: CodeExecutionRequest):
     """
-    Exexute code.
+    Execute code.
     Note: This endpoint current supports a REPL-like environment for Python only.
 
     Args:
