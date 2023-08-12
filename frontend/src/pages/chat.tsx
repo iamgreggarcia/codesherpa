@@ -46,7 +46,7 @@ export default function Chat() {
     console.log('formData: ', formData);
 
     try {
-      const response = await fetch('http://localhost:3333/upload', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DOCKER_URL}/upload`, {
         method: 'POST',
         body: formData
       });
@@ -71,7 +71,7 @@ export default function Chat() {
 
   const onDeleteFile = async () => {
     try {
-      const response = await fetch(`http://localhost:3333/delete-file?fileName=${uploadedFileName}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DOCKER_URL}/delete-file?fileName=${uploadedFileName}`, {
         method: 'DELETE',
       });
 
@@ -113,7 +113,7 @@ export default function Chat() {
 
     if (reader) {
       while (!done) {
-        setMessageIsStreaming(true);
+       
         if (cancelStreamRef.current === true) {
           abortController.abort();
           done = true;
@@ -168,7 +168,7 @@ export default function Chat() {
           }
         }
       }
-      setMessageIsStreaming(false);
+   
     }
 
     return assistantMessageContent;
@@ -225,7 +225,7 @@ export default function Chat() {
             // throw new Error('Endpoint is undefined');
             const functionCallMessage: Message = { role: 'assistant', content: `I'm sorry, I used the incorret function name '${functionName}'. Let me try again:\n` };
             setMessages(prevMessages => [...prevMessages, functionCallMessage]);
-            fetchChat([...messages, functionCallMessage], abortController);
+            await fetchChat([...messages, functionCallMessage], abortController);
           } else {
             console.log('endpoint: ', endpoint)
             const pluginResponse = await fetch(`${serverUrl}${endpoint}`, {
@@ -239,7 +239,7 @@ export default function Chat() {
             console.log('parsedFunctionCallResponse.result: ', parsedFunctionCallResponse.result ?? '')
             const functionCallMessage: Message = { role: 'function', name: functionName, content: `result: ${parsedFunctionCallResponse.result}` ?? 'result: ok' };
             setMessages(prevMessages => [...prevMessages, functionCallMessage]);
-            fetchChat([...messages, functionCallMessage], abortController);
+            await fetchChat([...messages, functionCallMessage], abortController);
           }
         }
       } catch (error) {
